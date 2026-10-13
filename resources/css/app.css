@@ -13,6 +13,36 @@
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
+    /* Sitio público: misma tipografía que el diseño original de fegat.mx */
+    --font-display: 'Jost', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+
+    --color-brand: #6c0ea3;
+    --color-brand-soft: #c699e1;
+
+    --animate-float: float 4s ease-in-out infinite;
+    --animate-marquee: marquee 40s linear infinite;
+
+    /* La cinta lleva el texto duplicado: al llegar a la mitad reinicia sin salto. */
+    @keyframes marquee {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-50%);
+        }
+    }
+
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-14px);
+        }
+    }
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
@@ -140,4 +170,16 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/*
+ * Los controles nativos (listas de <select>, selectores de fecha y hora, barras
+ * de desplazamiento) siguen el tema; sin esto se dibujan claros en modo oscuro.
+ */
+:root {
+    color-scheme: light;
+}
+
+.dark {
+    color-scheme: dark;
 }

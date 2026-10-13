@@ -16,6 +16,12 @@ export default defineConfig({
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
+                bunny('Jost', {
+                    weights: [500, 700],
+                }),
+                bunny('Open Sans', {
+                    weights: [400, 600],
+                }),
             ],
         }),
         inertia(),

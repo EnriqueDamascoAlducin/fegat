@@ -1,7 +1,12 @@
+export type UserRole = 'super_admin' | 'company_admin';
+
 export type User = {
     id: number;
     name: string;
     email: string;
+    role: UserRole;
+    company_id: number | null;
+    company?: { id: number; name: string; is_active: boolean } | null;
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
