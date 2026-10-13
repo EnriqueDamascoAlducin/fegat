@@ -51,8 +51,9 @@ class Semaphore
     }
 
     /**
-     * Regla del semáforo. Verde solo con mayoría de votos verdes; rojo con
-     * mayoría de rojos; cualquier otro reparto queda en amarillo.
+     * Regla del semáforo, con la seguridad por delante: verde solo si más de la
+     * mitad de los votos son verdes. Si no, gana el más votado entre amarillo y
+     * rojo, y un empate entre ellos se resuelve hacia el rojo.
      *
      * @param  array{green: int, yellow: int, red: int}  $counts
      * @return 'waiting'|'green'|'yellow'|'red'
@@ -64,7 +65,7 @@ class Semaphore
         return match (true) {
             $total === 0, $total < $minVotes => 'waiting',
             $total < $counts['green'] * 2 => VoteColor::Green->value,
-            $total < $counts['red'] * 2 => VoteColor::Red->value,
+            $counts['red'] >= $counts['yellow'] => VoteColor::Red->value,
             default => VoteColor::Yellow->value,
         };
     }

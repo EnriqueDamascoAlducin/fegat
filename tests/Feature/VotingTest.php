@@ -94,7 +94,7 @@ class VotingTest extends TestCase
                 ->where('myVote', 'green')
                 ->where('detail', null)
                 ->where('semaphore.votes_count', 2)
-                ->where('semaphore.status', 'yellow')
+                ->where('semaphore.status', 'red')
                 ->missing('semaphore.counts'));
     }
 

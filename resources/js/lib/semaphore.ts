@@ -29,13 +29,13 @@ export function describeSemaphore(semaphore: SemaphoreData): {
             return {
                 title: 'Precaución',
                 description:
-                    'No hay mayoría a favor de volar. Las condiciones siguen en evaluación.',
+                    'No hay mayoría a favor de volar. Las empresas recomiendan precaución.',
             };
         case 'red':
             return {
                 title: 'Vuelos no viables',
                 description:
-                    'La mayoría de las empresas considera que no hay condiciones para volar.',
+                    'No hay mayoría a favor de volar. Por seguridad, no se recomienda volar.',
             };
         case 'not_open':
             return {
