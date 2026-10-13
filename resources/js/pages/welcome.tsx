@@ -1,11 +1,13 @@
-import { Form, Head, Link, usePage, usePoll } from '@inertiajs/react';
-import { ArrowUp } from 'lucide-react';
+import { Form, Head, Link, usePoll } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import InstallButton from '@/components/install-button';
+import PostCard from '@/components/public/post-card';
+import type { PostSummary } from '@/components/public/post-card';
+import SectionTitle from '@/components/public/section-title';
 import SemaphoreCard from '@/components/semaphore-card';
+import PublicLayout from '@/layouts/public-layout';
 import { describeSemaphore } from '@/lib/semaphore';
 import { cn } from '@/lib/utils';
-import { dashboard, login } from '@/routes';
+import { index as blogIndex } from '@/routes/blog';
 import { store as sendContact } from '@/routes/contact';
 import type { SemaphoreData, SemaphoreStatus } from '@/types';
 
@@ -29,26 +31,6 @@ const pill =
 
 const field =
     'h-11 w-full rounded border border-[#ced4da] bg-white px-3 text-[#444] outline-none focus:border-brand-soft focus:ring-2 focus:ring-brand-soft/40';
-
-function SectionTitle({
-    title,
-    children,
-}: {
-    title: string;
-    children: ReactNode;
-}) {
-    return (
-        <div className="text-center">
-            <h2 className="font-display text-[32px] leading-tight font-bold text-brand uppercase">
-                {title}
-            </h2>
-            <div className="relative mx-auto mt-5 h-px w-32 bg-neutral-300">
-                <span className="absolute -top-px left-1/2 h-[3px] w-10 -translate-x-1/2 bg-brand-soft" />
-            </div>
-            <p className="mt-6">{children}</p>
-        </div>
-    );
-}
 
 function CompanyLogo({ company }: { company: Company }) {
     const content = company.logo_url ? (
@@ -104,115 +86,103 @@ function ContactField({
     );
 }
 
-const MY_FLIGHT_URL = 'https://myflight.com.mx/';
+type HomeContent = {
+    hero_title: string;
+    hero_text: string | null;
+    semaphore_text: string;
+    contact_text: string;
+};
 
-function PoweredByTicker() {
-    const items = Array.from({ length: 12 }, (_, index) => index);
+type HomeSection = {
+    id: number;
+    title: string;
+    body: string;
+    image_url: string | null;
+};
 
+function InfoSection({
+    section,
+    index,
+}: {
+    section: HomeSection;
+    index: number;
+}) {
     return (
-        <div className="overflow-hidden bg-[#4a0873] py-1.5 font-display text-xs tracking-[0.25em] text-white/90 uppercase">
-            <a
-                href={MY_FLIGHT_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="sr-only"
-            >
-                Powered by My Flight
-            </a>
+        <section
+            id={`seccion-${section.id}`}
+            className={cn(
+                'scroll-mt-28 px-6 py-16',
+                index % 2 === 0 && 'bg-[#f3f5fa]',
+            )}
+        >
+            <SectionTitle title={section.title} />
+
             <div
-                aria-hidden="true"
-                className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none"
+                className={cn(
+                    'mx-auto mt-10 text-lg leading-relaxed',
+                    section.image_url
+                        ? 'grid max-w-6xl items-center gap-10 md:grid-cols-2'
+                        : 'max-w-3xl',
+                )}
             >
-                {[0, 1].map((half) => (
-                    <div key={half} className="flex shrink-0">
-                        {items.map((item) => (
-                            <a
-                                key={item}
-                                href={MY_FLIGHT_URL}
-                                target="_blank"
-                                rel="noreferrer"
-                                tabIndex={-1}
-                                className="px-8 whitespace-nowrap hover:text-white hover:underline"
-                            >
-                                Powered by My Flight
-                            </a>
-                        ))}
-                    </div>
-                ))}
+                {section.image_url && (
+                    <img
+                        src={section.image_url}
+                        alt=""
+                        loading="lazy"
+                        className={cn(
+                            'w-full rounded-lg object-cover shadow-[0_0_24px_rgba(0,0,0,0.12)]',
+                            index % 2 === 1 && 'md:order-last',
+                        )}
+                    />
+                )}
+                {/* El servidor sanea este HTML al guardarlo (App\Support\RichText). */}
+                <div
+                    className="rich-text [&_a]:text-brand [&_h2]:text-brand [&_h3]:text-brand [&_h4]:text-brand"
+                    dangerouslySetInnerHTML={{ __html: section.body }}
+                />
             </div>
-        </div>
+        </section>
     );
 }
 
 export default function Welcome({
     semaphore,
+    content,
+    sections,
+    posts,
     companies,
     heroImage,
 }: {
     semaphore: SemaphoreData | null;
+    content: HomeContent;
+    sections: HomeSection[];
+    posts: PostSummary[];
     companies: Company[];
     heroImage: string | null;
 }) {
-    const { auth } = usePage().props;
-
     usePoll(15000, { only: ['semaphore'] });
 
     return (
         <>
             <Head title="Federación de Globos Aerostáticos Teotihuacan" />
 
-            <div
-                id="inicio"
-                className="min-h-screen bg-white font-body text-[#444]"
+            <PublicLayout
+                showSemaphore={semaphore !== null}
+                showBlog={posts.length > 0}
             >
-                <header className="sticky top-0 z-40 bg-brand/95 text-white backdrop-blur">
-                    <PoweredByTicker />
-                    <div className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-6">
-                        <a
-                            href="#inicio"
-                            className="font-display text-3xl font-medium tracking-[0.3em]"
-                        >
-                            FEGAT
-                        </a>
-                        <nav className="flex items-center gap-5 text-[15px] sm:gap-7">
-                            <a
-                                href="#inicio"
-                                className="hidden text-white/70 hover:text-white md:inline"
-                            >
-                                Inicio
-                            </a>
-                            {semaphore && (
-                                <a
-                                    href="#semaforo"
-                                    className="hidden text-white/70 hover:text-white sm:inline"
-                                >
-                                    Semáforo
-                                </a>
-                            )}
-                            <a
-                                href="#contacto"
-                                className="hidden text-white/70 hover:text-white sm:inline"
-                            >
-                                Contacto
-                            </a>
-                            <InstallButton className="text-white/70 hover:text-white" />
-                            <Link
-                                href={auth.user ? dashboard() : login()}
-                                className="rounded-full border-[1.6px] border-brand-soft px-5 py-2 font-semibold whitespace-nowrap transition-colors hover:bg-brand-soft"
-                            >
-                                {auth.user ? 'Panel' : 'Acceso empresas'}
-                            </Link>
-                        </nav>
-                    </div>
-                </header>
-
                 <section className="overflow-hidden bg-brand text-white">
                     <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 md:min-h-[440px] md:grid-cols-2 md:py-10">
                         <div>
                             <h1 className="font-display text-4xl leading-[1.17] font-bold text-balance uppercase sm:text-5xl">
-                                Federación de Globos Aerostáticos Teotihuacan
-                                A.C
+                                {content.hero_title}
                             </h1>
+
+                            {content.hero_text && (
+                                <p className="mt-4 max-w-xl text-lg text-white/85">
+                                    {content.hero_text}
+                                </p>
+                            )}
 
                             {semaphore && (
                                 <a
@@ -261,9 +231,7 @@ export default function Welcome({
                             className="scroll-mt-28 px-6 py-16"
                         >
                             <SectionTitle title="Semáforo de vuelos">
-                                Las empresas asociadas evalúan las condiciones
-                                de cada jornada y deciden en conjunto si es
-                                viable volar.
+                                {content.semaphore_text}
                             </SectionTitle>
 
                             <SemaphoreCard
@@ -271,6 +239,37 @@ export default function Welcome({
                                 tone="light"
                                 className="mx-auto mt-10 max-w-4xl shadow-[0_0_30px_rgba(0,0,0,0.15)]"
                             />
+                        </section>
+                    )}
+
+                    {sections.map((section, index) => (
+                        <InfoSection
+                            key={section.id}
+                            section={section}
+                            index={index}
+                        />
+                    ))}
+
+                    {posts.length > 0 && (
+                        <section
+                            id="blog"
+                            className="scroll-mt-28 border-t border-neutral-200 px-6 py-16"
+                        >
+                            <SectionTitle title="Blog">
+                                Noticias y artículos de la federación.
+                            </SectionTitle>
+
+                            <div className="mx-auto mt-10 grid max-w-6xl gap-8 md:grid-cols-3">
+                                {posts.map((post) => (
+                                    <PostCard key={post.id} post={post} />
+                                ))}
+                            </div>
+
+                            <div className="mt-10 text-center">
+                                <Link href={blogIndex()} className={pill}>
+                                    Ver todas las publicaciones
+                                </Link>
+                            </div>
                         </section>
                     )}
 
@@ -290,7 +289,7 @@ export default function Welcome({
 
                     <section id="contacto" className="scroll-mt-28 px-6 py-16">
                         <SectionTitle title="Contacto">
-                            Contáctanos para cualquier duda y/o aclaración.
+                            {content.contact_text}
                         </SectionTitle>
 
                         <Form
@@ -401,31 +400,7 @@ export default function Welcome({
                         </Form>
                     </section>
                 </main>
-
-                <footer className="bg-[#f3f5fa] py-6 text-center text-sm">
-                    © {new Date().getFullYear()} FEGAT · Federación de Globos
-                    Aerostáticos Teotihuacan A.C.
-                    <p className="mt-2 font-display text-xs tracking-[0.2em] text-neutral-500 uppercase">
-                        Powered by{' '}
-                        <a
-                            href={MY_FLIGHT_URL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="font-bold text-brand hover:underline"
-                        >
-                            My Flight
-                        </a>
-                    </p>
-                </footer>
-
-                <a
-                    href="#inicio"
-                    aria-label="Volver arriba"
-                    className="fixed right-4 bottom-4 z-40 flex size-10 items-center justify-center rounded-full bg-brand-soft text-white shadow hover:bg-brand"
-                >
-                    <ArrowUp className="size-5" />
-                </a>
-            </div>
+            </PublicLayout>
         </>
     );
 }

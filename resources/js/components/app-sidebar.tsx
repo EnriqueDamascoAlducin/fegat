@@ -1,5 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Building2, Clock, History, LayoutGrid, Users } from 'lucide-react';
+import {
+    Building2,
+    Clock,
+    History,
+    Home,
+    LayoutGrid,
+    Newspaper,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -15,6 +23,8 @@ import {
 import { dashboard } from '@/routes';
 import { history } from '@/routes/admin';
 import { index as companies } from '@/routes/admin/companies';
+import { edit as homeContent } from '@/routes/admin/home';
+import { index as posts } from '@/routes/admin/posts';
 import { index as users } from '@/routes/admin/users';
 import { edit as voting } from '@/routes/admin/voting';
 import type { NavItem } from '@/types';
@@ -28,6 +38,16 @@ const mainNavItems: NavItem[] = [
 ];
 
 const adminNavItems: NavItem[] = [
+    {
+        title: 'Página de inicio',
+        href: homeContent(),
+        icon: Home,
+    },
+    {
+        title: 'Blog',
+        href: posts(),
+        icon: Newspaper,
+    },
     {
         title: 'Historial',
         href: history(),
