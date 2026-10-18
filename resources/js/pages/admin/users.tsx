@@ -22,6 +22,12 @@ type CompanyOption = {
     name: string;
 };
 
+const ROLE_LABELS: Record<UserRole, string> = {
+    company_admin: 'Admin de empresa',
+    decider: 'Decisor del semáforo',
+    super_admin: 'Super admin',
+};
+
 const selectClass =
     'h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [&>option]:bg-background [&>option]:text-foreground';
 
@@ -74,8 +80,11 @@ function UserFields({
                     }
                     className={selectClass}
                 >
-                    <option value="company_admin">Admin de empresa</option>
-                    <option value="super_admin">Super admin</option>
+                    {(Object.keys(ROLE_LABELS) as UserRole[]).map((value) => (
+                        <option key={value} value={value}>
+                            {ROLE_LABELS[value]}
+                        </option>
+                    ))}
                 </select>
                 <InputError message={errors.role} />
             </div>
@@ -143,7 +152,7 @@ export default function Users({
             <div className="max-w-3xl space-y-8 p-4">
                 <Heading
                     title="Usuarios"
-                    description="Los admin de empresa votan por su empresa; los super admin ven todo y configuran la votación."
+                    description="Los admin de empresa votan por su empresa; el decisor fija el color que se publica; los super admin ven todo y configuran la votación."
                 />
 
                 <Form
@@ -203,10 +212,10 @@ export default function Users({
                                         </p>
                                         <p className="truncate text-sm text-muted-foreground">
                                             {user.email} ·{' '}
-                                            {user.role === 'super_admin'
-                                                ? 'Super admin'
-                                                : (user.company_name ??
-                                                  'Sin empresa')}
+                                            {user.role === 'company_admin'
+                                                ? (user.company_name ??
+                                                  'Sin empresa')
+                                                : ROLE_LABELS[user.role]}
                                         </p>
                                     </div>
                                     <div className="flex shrink-0 gap-2">

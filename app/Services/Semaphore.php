@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\VoteColor;
 use App\Models\Company;
+use App\Models\FinalDecision;
 use App\Models\Vote;
 use App\Models\VotingSetting;
 use Carbon\CarbonImmutable;
@@ -92,17 +93,22 @@ class Semaphore
     /**
      * Estado público del semáforo: nunca incluye el desglose de votos.
      *
-     * @return array{status: string, phase: string, flight_date: string, opens_at: string, closes_at: string, votes_count: int, companies_count: int, min_votes: int}
+     * @return array{status: string, decided: bool, phase: string, flight_date: string, opens_at: string, closes_at: string, votes_count: int, companies_count: int, min_votes: int}
      */
     public function status(?DateTimeInterface $now = null): array
     {
         $session = $this->session($now);
         $counts = $this->counts($session['flight_date']);
         $minVotes = VotingSetting::current()->min_votes;
+        $decision = FinalDecision::query()->where('flight_date', $session['flight_date'])->first();
 
         return [
             ...$session,
-            'status' => $session['phase'] === 'before' ? 'not_open' : $this->decide($counts, $minVotes),
+            // La decisión final, si existe, se publica tal cual: no depende del
+            // horario, del mínimo de votos ni de lo que hayan votado las empresas.
+            'status' => $decision?->color->value
+                ?? ($session['phase'] === 'before' ? 'not_open' : $this->decide($counts, $minVotes)),
+            'decided' => $decision !== null,
             'votes_count' => array_sum($counts),
             'companies_count' => Company::query()->where('is_active', true)->count(),
             'min_votes' => $minVotes,

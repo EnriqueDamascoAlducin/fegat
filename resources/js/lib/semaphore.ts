@@ -14,10 +14,36 @@ export function formatFlightDate(date: string): string {
     });
 }
 
+const DECIDED: Record<VoteColor, { title: string; description: string }> = {
+    green: {
+        title: 'Vuelos viables',
+        description:
+            'Decisión oficial: hay condiciones para volar en esta jornada.',
+    },
+    yellow: {
+        title: 'Precaución',
+        description:
+            'Decisión oficial: se recomienda precaución para los vuelos de esta jornada.',
+    },
+    red: {
+        title: 'Vuelos no viables',
+        description:
+            'Decisión oficial: no hay condiciones para volar en esta jornada.',
+    },
+};
+
 export function describeSemaphore(semaphore: SemaphoreData): {
     title: string;
     description: string;
 } {
+    if (
+        semaphore.decided &&
+        semaphore.status !== 'waiting' &&
+        semaphore.status !== 'not_open'
+    ) {
+        return DECIDED[semaphore.status];
+    }
+
     switch (semaphore.status) {
         case 'green':
             return {

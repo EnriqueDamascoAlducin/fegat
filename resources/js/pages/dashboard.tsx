@@ -2,11 +2,16 @@ import { Head, router, usePage, usePoll } from '@inertiajs/react';
 import { useState } from 'react';
 import InstallButton from '@/components/install-button';
 import SemaphoreCard from '@/components/semaphore-card';
+import { Button } from '@/components/ui/button';
 import VoteBadge from '@/components/vote-badge';
 import { COLOR_LABELS } from '@/lib/semaphore';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
-import { store } from '@/routes/votes';
+import {
+    destroy as removeDecision,
+    store as storeDecision,
+} from '@/routes/decision';
+import { store as storeVote } from '@/routes/votes';
 import type { SemaphoreData, VoteColor, VoteCounts } from '@/types';
 
 type Detail = {
@@ -17,6 +22,12 @@ type Detail = {
         voted_by: string | null;
         voted_at: string | null;
     }[];
+};
+
+type Decision = {
+    color: VoteColor;
+    decided_by: string | null;
+    decided_at: string | null;
 };
 
 const OPTIONS: { color: VoteColor; hint: string; active: string }[] = [
@@ -37,16 +48,57 @@ const OPTIONS: { color: VoteColor; hint: string; active: string }[] = [
     },
 ];
 
+function ColorButtons({
+    selected,
+    disabled,
+    onSelect,
+}: {
+    selected: VoteColor | null;
+    disabled: boolean;
+    onSelect: (color: VoteColor) => void;
+}) {
+    return (
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {OPTIONS.map((option) => (
+                <button
+                    key={option.color}
+                    type="button"
+                    disabled={disabled}
+                    aria-pressed={selected === option.color}
+                    onClick={() => onSelect(option.color)}
+                    className={cn(
+                        'rounded-xl border-2 px-4 py-6 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                        selected === option.color
+                            ? option.active
+                            : 'hover:bg-accent',
+                    )}
+                >
+                    <span className="block text-xl font-semibold">
+                        {COLOR_LABELS[option.color]}
+                    </span>
+                    <span className="mt-1 block text-sm opacity-80">
+                        {option.hint}
+                    </span>
+                </button>
+            ))}
+        </div>
+    );
+}
+
 export default function Dashboard({
     semaphore,
     canVote,
+    canDecide,
     myVote,
+    decision,
     detail,
     publicVisible,
 }: {
     semaphore: SemaphoreData;
     canVote: boolean;
+    canDecide: boolean;
     myVote: VoteColor | null;
+    decision: Decision | null;
     detail: Detail | null;
     publicVisible: boolean;
 }) {
@@ -56,16 +108,10 @@ export default function Dashboard({
 
     usePoll(15000);
 
-    const vote = (color: VoteColor) => {
-        router.post(
-            store.url(),
-            { color },
-            {
-                preserveScroll: true,
-                onStart: () => setSending(true),
-                onFinish: () => setSending(false),
-            },
-        );
+    const visitOptions = {
+        preserveScroll: true,
+        onStart: () => setSending(true),
+        onFinish: () => setSending(false),
     };
 
     return (
@@ -76,6 +122,54 @@ export default function Dashboard({
                 <InstallButton className="self-start rounded-full border px-4 py-1.5 text-sm hover:bg-accent" />
 
                 <SemaphoreCard semaphore={semaphore} />
+
+                {canDecide && (
+                    <section className="rounded-2xl border p-6">
+                        <h2 className="text-lg font-semibold">
+                            Decisión final
+                        </h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            El color que elijas es el que se publica en la
+                            página, sin considerar los votos de las empresas.
+                            Puedes cambiarlo en cualquier momento.
+                        </p>
+
+                        <ColorButtons
+                            selected={decision?.color ?? null}
+                            disabled={sending}
+                            onSelect={(color) =>
+                                router.post(
+                                    storeDecision.url(),
+                                    { color },
+                                    visitOptions,
+                                )
+                            }
+                        />
+
+                        {decision && (
+                            <div className="mt-5 flex flex-wrap items-center gap-3">
+                                <p className="text-sm text-muted-foreground">
+                                    Decisión vigente desde las{' '}
+                                    {decision.decided_at} h.
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={sending}
+                                    onClick={() =>
+                                        router.delete(
+                                            removeDecision.url(),
+                                            visitOptions,
+                                        )
+                                    }
+                                >
+                                    Retirar decisión y volver al cálculo por
+                                    votos
+                                </Button>
+                            </div>
+                        )}
+                    </section>
+                )}
 
                 {canVote && (
                     <section className="rounded-2xl border p-6">
@@ -90,34 +184,21 @@ export default function Dashboard({
                                 : `La votación está cerrada. Horario: ${semaphore.opens_at} a ${semaphore.closes_at} h.`}
                         </p>
 
-                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                            {OPTIONS.map((option) => (
-                                <button
-                                    key={option.color}
-                                    type="button"
-                                    disabled={!isOpen || sending}
-                                    aria-pressed={myVote === option.color}
-                                    onClick={() => vote(option.color)}
-                                    className={cn(
-                                        'rounded-xl border-2 px-4 py-6 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50',
-                                        myVote === option.color
-                                            ? option.active
-                                            : 'hover:bg-accent',
-                                    )}
-                                >
-                                    <span className="block text-xl font-semibold">
-                                        {COLOR_LABELS[option.color]}
-                                    </span>
-                                    <span className="mt-1 block text-sm opacity-80">
-                                        {option.hint}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
+                        <ColorButtons
+                            selected={myVote}
+                            disabled={!isOpen || sending}
+                            onSelect={(color) =>
+                                router.post(
+                                    storeVote.url(),
+                                    { color },
+                                    visitOptions,
+                                )
+                            }
+                        />
                     </section>
                 )}
 
-                {!canVote && !detail && (
+                {!canVote && !canDecide && !detail && (
                     <p className="rounded-2xl border p-6 text-sm text-muted-foreground">
                         Tu usuario no está ligado a una empresa activa, así que
                         no puede votar. Contacta al administrador de FEGAT.
@@ -136,7 +217,22 @@ export default function Dashboard({
                         <h2 className="text-lg font-semibold">
                             Votos de la jornada
                         </h2>
-                        <p className="mt-1 text-sm text-muted-foreground">
+
+                        {decision && (
+                            <p className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-brand-soft/60 p-3 text-sm">
+                                <span className="font-medium">
+                                    Decisión final:
+                                </span>
+                                <VoteBadge color={decision.color} />
+                                <span className="text-muted-foreground">
+                                    {decision.decided_by ?? 'Decisor'} ·{' '}
+                                    {decision.decided_at} h. Este es el color
+                                    publicado; los votos de abajo no lo cambian.
+                                </span>
+                            </p>
+                        )}
+
+                        <p className="mt-3 text-sm text-muted-foreground">
                             Verde {detail.counts.green} · Amarillo{' '}
                             {detail.counts.yellow} · Rojo {detail.counts.red} ·
                             Mínimo para emitir resultado: {semaphore.min_votes}

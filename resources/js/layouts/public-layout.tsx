@@ -6,6 +6,7 @@ import { dashboard, login } from '@/routes';
 import { index as blog } from '@/routes/blog';
 
 const MY_FLIGHT_URL = 'https://myflight.com.mx/';
+const MY_FLIGHT_LOGO = '/images/myflight-logo.png';
 
 const navLink = 'hidden text-white/70 hover:text-white sm:inline';
 
@@ -35,9 +36,15 @@ function PoweredByTicker() {
                                 target="_blank"
                                 rel="noreferrer"
                                 tabIndex={-1}
-                                className="px-8 whitespace-nowrap hover:text-white hover:underline"
+                                className="flex items-center gap-2 px-8 whitespace-nowrap hover:text-white hover:underline"
                             >
-                                Powered by My Flight
+                                Powered by
+                                <img
+                                    src={MY_FLIGHT_LOGO}
+                                    alt=""
+                                    className="size-5"
+                                />
+                                My Flight
                             </a>
                         ))}
                     </div>
@@ -112,14 +119,19 @@ export default function PublicLayout({
             <footer className="bg-[#f3f5fa] py-6 text-center text-sm">
                 © {new Date().getFullYear()} FEGAT · Federación de Globos
                 Aerostáticos Teotihuacan A.C.
-                <p className="mt-2 font-display text-xs tracking-[0.2em] text-neutral-500 uppercase">
-                    Powered by{' '}
+                <p className="mt-2 flex items-center justify-center gap-2 font-display text-xs tracking-[0.2em] text-neutral-500 uppercase">
+                    Powered by
                     <a
                         href={MY_FLIGHT_URL}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-bold text-brand hover:underline"
+                        className="flex items-center gap-2 font-bold text-brand hover:underline"
                     >
+                        <img
+                            src={MY_FLIGHT_LOGO}
+                            alt=""
+                            className="size-8"
+                        />
                         My Flight
                     </a>
                 </p>

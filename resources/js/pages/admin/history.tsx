@@ -4,15 +4,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import VoteBadge from '@/components/vote-badge';
 import { formatFlightDate } from '@/lib/semaphore';
+import { cn } from '@/lib/utils';
 import { history } from '@/routes/admin';
 import type { VoteColor, VoteCounts } from '@/types';
 
 type Change = {
-    id: number;
+    id: string;
+    is_decision: boolean;
     company: string;
     user_name: string;
     from_color: VoteColor | null;
-    to_color: VoteColor;
+    to_color: VoteColor | null;
     at: string | null;
 };
 
@@ -32,7 +34,7 @@ export default function History({
             <div className="max-w-3xl space-y-6 p-4">
                 <Heading
                     title="Historial de votos"
-                    description="Cada voto y cada cambio de voto queda registrado con quién lo hizo y a qué hora."
+                    description="Cada voto, cambio de voto y decisión final queda registrado con quién lo hizo y a qué hora."
                 />
 
                 <div className="grid max-w-xs gap-2">
@@ -58,7 +60,7 @@ export default function History({
                     <span className="first-letter:uppercase">
                         {formatFlightDate(date)}
                     </span>{' '}
-                    · Resultado final de votos: Verde {counts.green} · Amarillo{' '}
+                    · Votos de las empresas: Verde {counts.green} · Amarillo{' '}
                     {counts.yellow} · Rojo {counts.red}
                 </p>
 
@@ -92,7 +94,13 @@ export default function History({
                                         <td className="py-2 pr-4 tabular-nums">
                                             {change.at}
                                         </td>
-                                        <td className="py-2 pr-4">
+                                        <td
+                                            className={cn(
+                                                'py-2 pr-4',
+                                                change.is_decision &&
+                                                    'font-semibold',
+                                            )}
+                                        >
                                             {change.company}
                                         </td>
                                         <td className="py-2 pr-4">
@@ -111,9 +119,15 @@ export default function History({
                                                     </span>
                                                 </>
                                             )}
-                                            <VoteBadge
-                                                color={change.to_color}
-                                            />
+                                            {change.to_color ? (
+                                                <VoteBadge
+                                                    color={change.to_color}
+                                                />
+                                            ) : (
+                                                <span className="text-muted-foreground">
+                                                    Retirada
+                                                </span>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

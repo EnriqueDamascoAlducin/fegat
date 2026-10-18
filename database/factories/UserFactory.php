@@ -74,6 +74,17 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the user makes the final semaphore decision.
+     */
+    public function decider(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Decider,
+            'company_id' => null,
+        ]);
+    }
+
+    /**
      * Indicate that the user administers the given company.
      */
     public function forCompany(?Company $company = null): static

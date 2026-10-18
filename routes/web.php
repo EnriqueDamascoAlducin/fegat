@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\VotingSettingController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\VoteController;
 use App\Http\Middleware\EnsureSuperAdmin;
@@ -23,6 +24,8 @@ Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::post('votes', [VoteController::class, 'store'])->name('votes.store');
+    Route::post('decision', [DecisionController::class, 'store'])->name('decision.store');
+    Route::delete('decision', [DecisionController::class, 'destroy'])->name('decision.destroy');
 
     Route::middleware(EnsureSuperAdmin::class)->prefix('admin')->name('admin.')->group(function () {
         Route::get('votacion', [VotingSettingController::class, 'edit'])->name('voting.edit');

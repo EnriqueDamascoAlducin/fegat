@@ -91,7 +91,7 @@ class UserController extends Controller
             'password' => [$user ? 'nullable' : 'required', 'string', Password::defaults()],
         ]);
 
-        if ($validated['role'] === UserRole::SuperAdmin->value) {
+        if ($validated['role'] !== UserRole::CompanyAdmin->value) {
             $validated['company_id'] = null;
         }
 

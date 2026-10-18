@@ -4,6 +4,8 @@ export type SemaphoreStatus = VoteColor | 'waiting' | 'not_open';
 
 export type SemaphoreData = {
     status: SemaphoreStatus;
+    /** El color lo fijó el decisor; no sale del cálculo de votos. */
+    decided: boolean;
     phase: 'before' | 'open' | 'closed';
     flight_date: string;
     opens_at: string;

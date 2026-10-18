@@ -66,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->role === UserRole::SuperAdmin;
     }
 
+    public function isDecider(): bool
+    {
+        return $this->role === UserRole::Decider;
+    }
+
     /**
      * Solo vota quien administra una empresa asociada activa.
      */

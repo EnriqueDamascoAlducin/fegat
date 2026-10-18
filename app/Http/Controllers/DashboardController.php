@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\FinalDecision;
 use App\Models\Vote;
 use App\Models\VotingSetting;
 use App\Services\Semaphore;
@@ -13,16 +14,19 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     /**
-     * Panel: la empresa ve solo su voto; el super admin ve el detalle completo.
+     * Panel: la empresa ve solo su voto, el decisor fija el color publicado
+     * y el super admin ve el detalle completo.
      */
     public function __invoke(Request $request, Semaphore $semaphore): Response
     {
         $user = $request->user();
         $status = $semaphore->status();
+        $decision = FinalDecision::query()->with('user:id,name')->where('flight_date', $status['flight_date'])->first();
 
         return Inertia::render('dashboard', [
             'semaphore' => $status,
             'canVote' => $user->canVote(),
+            'canDecide' => $user->isDecider(),
             'publicVisible' => VotingSetting::current()->public_visible,
             'myVote' => $user->canVote()
                 ? Vote::query()
@@ -30,6 +34,11 @@ class DashboardController extends Controller
                     ->where('flight_date', $status['flight_date'])
                     ->value('color')
                 : null,
+            'decision' => $decision && ($user->isDecider() || $user->isSuperAdmin()) ? [
+                'color' => $decision->color->value,
+                'decided_by' => $decision->user?->name,
+                'decided_at' => $decision->updated_at?->format('H:i'),
+            ] : null,
             'detail' => $user->isSuperAdmin() ? [
                 'counts' => $semaphore->counts($status['flight_date']),
                 'votes' => $this->votesByCompany($status['flight_date']),
