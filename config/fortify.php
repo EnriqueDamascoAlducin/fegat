@@ -162,7 +162,7 @@ return [
 
     'features' => [
         Features::resetPasswords(),
-        Features::emailVerification(),
+        // Sin verificación de correo: las cuentas las da de alta el super admin.
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,

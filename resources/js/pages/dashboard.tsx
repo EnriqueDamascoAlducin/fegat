@@ -39,17 +39,17 @@ type Decision = {
 const OPTIONS: { color: VoteColor; hint: string; active: string }[] = [
     {
         color: 'green',
-        hint: 'Es viable volar',
+        hint: 'Volamos',
         active: 'border-emerald-500 bg-emerald-500 text-white',
     },
     {
         color: 'yellow',
-        hint: 'Con precaución',
+        hint: 'En espera',
         active: 'border-amber-400 bg-amber-400 text-neutral-900',
     },
     {
         color: 'red',
-        hint: 'No es viable volar',
+        hint: 'Se cancela',
         active: 'border-red-500 bg-red-500 text-white',
     },
 ];

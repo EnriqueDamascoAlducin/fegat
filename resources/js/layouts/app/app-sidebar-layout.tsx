@@ -2,6 +2,7 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import PoweredBy from '@/components/powered-by';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppSidebarLayout({
@@ -14,6 +15,7 @@ export default function AppSidebarLayout({
             <AppContent variant="sidebar" className="min-w-0 overflow-x-clip">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
+                <PoweredBy />
             </AppContent>
         </AppShell>
     );

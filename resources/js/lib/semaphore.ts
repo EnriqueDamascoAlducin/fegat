@@ -16,19 +16,19 @@ export function formatFlightDate(date: string): string {
 
 const DECIDED: Record<VoteColor, { title: string; description: string }> = {
     green: {
-        title: 'Vuelos viables',
+        title: 'Volamos',
         description:
             'Decisión oficial: hay condiciones para volar en esta jornada.',
     },
     yellow: {
-        title: 'Precaución',
+        title: 'En espera',
         description:
-            'Decisión oficial: se recomienda precaución para los vuelos de esta jornada.',
+            'Decisión oficial: los vuelos quedan en espera hasta nuevo aviso.',
     },
     red: {
-        title: 'Vuelos no viables',
+        title: 'Se cancela',
         description:
-            'Decisión oficial: no hay condiciones para volar en esta jornada.',
+            'Decisión oficial: los vuelos de esta jornada se cancelan.',
     },
 };
 
@@ -47,21 +47,21 @@ export function describeSemaphore(semaphore: SemaphoreData): {
     switch (semaphore.status) {
         case 'green':
             return {
-                title: 'Vuelos viables',
+                title: 'Volamos',
                 description:
                     'La mayoría de las empresas considera favorables las condiciones.',
             };
         case 'yellow':
             return {
-                title: 'Precaución',
+                title: 'En espera',
                 description:
-                    'No hay mayoría a favor de volar. Las empresas recomiendan precaución.',
+                    'No hay mayoría a favor de volar. Los vuelos quedan en espera.',
             };
         case 'red':
             return {
-                title: 'Vuelos no viables',
+                title: 'Se cancela',
                 description:
-                    'No hay mayoría a favor de volar. Por seguridad, no se recomienda volar.',
+                    'No hay mayoría a favor de volar. Por seguridad, los vuelos se cancelan.',
             };
         case 'not_open':
             return {
@@ -69,8 +69,9 @@ export function describeSemaphore(semaphore: SemaphoreData): {
                 description: `Las empresas votan de ${semaphore.opens_at} a ${semaphore.closes_at} h.`,
             };
         default:
+            // «En espera» es el amarillo; sin quórum se dice distinto para no confundirlos.
             return {
-                title: 'En espera',
+                title: 'Esperando votos',
                 description:
                     semaphore.phase === 'closed'
                         ? 'La votación cerró sin alcanzar el mínimo de votos.'

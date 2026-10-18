@@ -2,11 +2,9 @@ import { Link, usePage } from '@inertiajs/react';
 import { ArrowUp } from 'lucide-react';
 import type { ReactNode } from 'react';
 import InstallButton from '@/components/install-button';
+import { MY_FLIGHT_LOGO, MY_FLIGHT_URL } from '@/components/powered-by';
 import { dashboard, login } from '@/routes';
 import { index as blog } from '@/routes/blog';
-
-const MY_FLIGHT_URL = 'https://myflight.com.mx/';
-const MY_FLIGHT_LOGO = '/images/myflight-logo.png';
 
 const navLink = 'hidden text-white/70 hover:text-white sm:inline';
 

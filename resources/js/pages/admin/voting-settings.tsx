@@ -78,8 +78,8 @@ export default function VotingSettings({ settings }: { settings: Settings }) {
                                     defaultValue={settings.min_votes}
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Con menos votos el semáforo se muestra «En
-                                    espera».
+                                    Con menos votos el semáforo se muestra
+                                    «Esperando votos».
                                 </p>
                                 <InputError message={errors.min_votes} />
                             </div>

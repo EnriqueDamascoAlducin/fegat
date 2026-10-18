@@ -21,7 +21,7 @@ Route::post('contacto', [ContactController::class, 'store'])->middleware('thrott
 Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::post('votes', [VoteController::class, 'store'])->name('votes.store');
     Route::post('decision', [DecisionController::class, 'store'])->name('decision.store');
