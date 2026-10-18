@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     Building2,
+    ChartColumn,
     Clock,
     History,
     Home,
@@ -20,7 +21,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, indicators } from '@/routes';
 import { history } from '@/routes/admin';
 import { index as companies } from '@/routes/admin/companies';
 import { edit as homeContent } from '@/routes/admin/home';
@@ -34,6 +35,11 @@ const mainNavItems: NavItem[] = [
         title: 'Semáforo',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Indicadores',
+        href: indicators(),
+        icon: ChartColumn,
     },
 ];
 

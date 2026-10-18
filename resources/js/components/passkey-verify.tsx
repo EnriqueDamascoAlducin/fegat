@@ -65,7 +65,7 @@ export default function PasskeyVerify({
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-background px-2 text-muted-foreground">
-                        {separator ?? 'O continúa con tu correo'}
+                        {separator ?? 'O continúa con tu correo o alias'}
                     </span>
                 </div>
             </div>

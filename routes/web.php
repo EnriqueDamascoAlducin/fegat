@@ -12,6 +12,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\VoteController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,7 @@ Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('indicadores', IndicatorController::class)->name('indicators');
     Route::post('votes', [VoteController::class, 'store'])->name('votes.store');
     Route::post('decision', [DecisionController::class, 'store'])->name('decision.store');
     Route::delete('decision', [DecisionController::class, 'destroy'])->name('decision.destroy');
