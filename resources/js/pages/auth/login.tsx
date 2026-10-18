@@ -31,16 +31,19 @@ export default function Login({ status, canResetPassword }: Props) {
                 {({ processing, errors }) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Correo</Label>
+                            <Label htmlFor="email">Correo o alias</Label>
                             <Input
                                 id="email"
-                                type="email"
+                                type="text"
                                 name="email"
                                 required
                                 autoFocus
                                 tabIndex={1}
-                                autoComplete="email"
-                                placeholder="correo@empresa.com"
+                                autoComplete="username"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                                spellCheck={false}
+                                placeholder="correo@empresa.com o tu alias"
                             />
                             <InputError message={errors.email} />
                         </div>
@@ -103,5 +106,6 @@ export default function Login({ status, canResetPassword }: Props) {
 
 Login.layout = {
     title: 'Acceso para empresas asociadas',
-    description: 'Ingresa con el correo y la contraseña que te dio FEGAT',
+    description:
+        'Ingresa con tu correo o alias y la contraseña que te dio FEGAT',
 };

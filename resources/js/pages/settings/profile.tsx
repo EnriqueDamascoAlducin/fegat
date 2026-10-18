@@ -34,7 +34,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Perfil"
-                    description="Actualiza tu nombre y tu correo"
+                    description="Actualiza tu nombre, tu correo y tu alias"
                 />
 
                 <Form
@@ -82,6 +82,34 @@ export default function Profile({
                                 <InputError
                                     className="mt-2"
                                     message={errors.email}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="username">
+                                    Alias (opcional)
+                                </Label>
+
+                                <Input
+                                    id="username"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.username ?? ''}
+                                    name="username"
+                                    autoComplete="off"
+                                    autoCapitalize="none"
+                                    spellCheck={false}
+                                    placeholder="ej. aerostat"
+                                />
+
+                                <p className="text-sm text-muted-foreground">
+                                    Puedes entrar con tu alias en lugar del
+                                    correo. Solo letras, números, punto, guion o
+                                    guion bajo.
+                                </p>
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.username}
                                 />
                             </div>
 

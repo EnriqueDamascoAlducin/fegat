@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,6 +21,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string|null $username Alias para iniciar sesión sin escribir el correo.
  * @property UserRole $role
  * @property int|null $company_id
  * @property Carbon|null $email_verified_at
@@ -31,7 +33,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role', 'company_id'])]
+#[Fillable(['name', 'email', 'username', 'password', 'role', 'company_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
@@ -51,6 +53,26 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'role' => UserRole::class,
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * El alias se guarda en minúsculas, igual que se busca al iniciar sesión.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function username(): Attribute
+    {
+        return Attribute::set(fn (?string $value) => filled($value) ? mb_strtolower(trim($value)) : null);
+    }
+
+    /**
+     * Busca al usuario por correo si lo escrito lleva «@», o por alias si no.
+     */
+    public static function findForLogin(string $login): ?self
+    {
+        $login = mb_strtolower(trim($login));
+
+        return static::query()->where(str_contains($login, '@') ? 'email' : 'username', $login)->first();
     }
 
     /**

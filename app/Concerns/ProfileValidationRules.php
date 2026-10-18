@@ -18,6 +18,26 @@ trait ProfileValidationRules
         return [
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
+            'username' => $this->usernameRules($userId),
+        ];
+    }
+
+    /**
+     * El alias es opcional; sin «@» para no confundirse con un correo al iniciar sesión.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function usernameRules(?int $userId = null): array
+    {
+        return [
+            'nullable',
+            'string',
+            'min:3',
+            'max:30',
+            'regex:/^[a-z0-9._-]+$/i',
+            $userId === null
+                ? Rule::unique(User::class, 'username')
+                : Rule::unique(User::class, 'username')->ignore($userId),
         ];
     }
 

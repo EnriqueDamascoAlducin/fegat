@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\ProfileValidationRules;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
@@ -16,6 +17,8 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    use ProfileValidationRules;
+
     public function index(): Response
     {
         return Inertia::render('admin/users', [
@@ -27,6 +30,7 @@ class UserController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'username' => $user->username,
                     'role' => $user->role->value,
                     'company_id' => $user->company_id,
                     'company_name' => $user->company?->name,
@@ -82,6 +86,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user)],
+            'username' => $this->usernameRules($user?->id),
             'role' => ['required', Rule::enum(UserRole::class)],
             'company_id' => [
                 Rule::requiredIf($request->input('role') === UserRole::CompanyAdmin->value),

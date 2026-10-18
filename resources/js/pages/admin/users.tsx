@@ -12,6 +12,7 @@ type UserRow = {
     id: number;
     name: string;
     email: string;
+    username: string | null;
     role: UserRole;
     company_id: number | null;
     company_name: string | null;
@@ -67,6 +68,20 @@ function UserFields({
                     defaultValue={user?.email}
                 />
                 <InputError message={errors.email} />
+            </div>
+
+            <div className="grid gap-2">
+                <Label htmlFor={`username-${id}`}>Alias (opcional)</Label>
+                <Input
+                    id={`username-${id}`}
+                    name="username"
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    placeholder="ej. aerostat"
+                    defaultValue={user?.username ?? ''}
+                />
+                <InputError message={errors.username} />
             </div>
 
             <div className="grid gap-2">
@@ -211,7 +226,10 @@ export default function Users({
                                             {user.name}
                                         </p>
                                         <p className="truncate text-sm text-muted-foreground">
-                                            {user.email} ·{' '}
+                                            {user.email}
+                                            {user.username &&
+                                                ` · @${user.username}`}{' '}
+                                            ·{' '}
                                             {user.role === 'company_admin'
                                                 ? (user.company_name ??
                                                   'Sin empresa')

@@ -281,7 +281,7 @@ return [
         'type' => 'tipo',
         'updated_at' => 'actualizado el',
         'user' => 'usuario',
-        'username' => 'usuario',
+        'username' => 'alias',
         'value' => 'valor',
         'winner' => 'ganador',
         'work' => 'trabajo',

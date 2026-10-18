@@ -127,11 +127,7 @@ export default function PublicLayout({
                         rel="noreferrer"
                         className="flex items-center gap-2 font-bold text-brand hover:underline"
                     >
-                        <img
-                            src={MY_FLIGHT_LOGO}
-                            alt=""
-                            className="size-8"
-                        />
+                        <img src={MY_FLIGHT_LOGO} alt="" className="size-8" />
                         My Flight
                     </a>
                 </p>
