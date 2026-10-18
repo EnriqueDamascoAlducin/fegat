@@ -3,12 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactMessage;
+use App\Models\HomeContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ContactController extends Controller
 {
+    /**
+     * Página de contacto con los datos de la oficina y el formulario.
+     */
+    public function show(): Response
+    {
+        $content = HomeContent::current();
+
+        return Inertia::render('contact', [
+            'text' => $content->contact_text,
+            'details' => $content->only(HomeContent::CONTACT_FIELDS),
+        ]);
+    }
+
     /**
      * Envía a la federación un mensaje del formulario de contacto público.
      */

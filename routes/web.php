@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SitePage;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\HomeContentController;
 use App\Http\Controllers\Admin\HomeSectionController;
@@ -13,14 +14,17 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IndicatorController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\VoteController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('contacto', [ContactController::class, 'show'])->name('contact.show');
 Route::post('contacto', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
 Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('{page}', PageController::class)->whereIn('page', SitePage::routable())->name('page');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');

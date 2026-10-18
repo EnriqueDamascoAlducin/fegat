@@ -17,13 +17,11 @@ const pageLink =
 
 export default function BlogIndex({
     posts,
-    showSemaphore,
 }: {
     posts: Paginated<PostSummary>;
-    showSemaphore: boolean;
 }) {
     return (
-        <PublicLayout showSemaphore={showSemaphore} showBlog>
+        <PublicLayout>
             <Head title="Blog">
                 <meta
                     name="description"

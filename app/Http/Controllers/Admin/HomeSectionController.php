@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\SitePage;
 use App\Http\Controllers\Concerns\SyncsUploadedImage;
 use App\Http\Controllers\Controller;
 use App\Models\HomeSection;
@@ -21,9 +22,10 @@ class HomeSectionController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $validated = $this->validated($request);
         $section = HomeSection::query()->create([
-            ...$this->validated($request),
-            'position' => (int) HomeSection::query()->max('position') + 1,
+            ...$validated,
+            'position' => (int) HomeSection::query()->where('page', $validated['page'])->max('position') + 1,
         ]);
         $this->syncImage($request, $section, 'image_path', 'image', 'home');
 
@@ -34,7 +36,14 @@ class HomeSectionController extends Controller
 
     public function update(Request $request, HomeSection $section): RedirectResponse
     {
-        $section->update($this->validated($request));
+        $validated = $this->validated($request);
+
+        // Al cambiarla de página queda al final de la nueva.
+        if ($validated['page'] !== $section->page) {
+            $validated['position'] = (int) HomeSection::query()->where('page', $validated['page'])->max('position') + 1;
+        }
+
+        $section->update($validated);
         $this->syncImage($request, $section, 'image_path', 'image', 'home');
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Sección actualizada.']);
@@ -79,7 +88,7 @@ class HomeSectionController extends Controller
         ]);
 
         DB::transaction(function () use ($section, $validated) {
-            $ordered = HomeSection::query()->orderBy('position')->orderBy('id')->lockForUpdate()->get();
+            $ordered = HomeSection::query()->where('page', $section->page)->orderBy('position')->orderBy('id')->lockForUpdate()->get();
             $index = $ordered->search(fn (HomeSection $item) => $item->is($section));
             $target = $index + ($validated['direction'] === 'up' ? -1 : 1);
 
@@ -99,11 +108,12 @@ class HomeSectionController extends Controller
     }
 
     /**
-     * @return array{title: string, body: string, is_visible: bool}
+     * @return array{page: SitePage, title: string, body: string, is_visible: bool}
      */
     private function validated(Request $request): array
     {
         $validated = $request->validate([
+            'page' => ['nullable', Rule::enum(SitePage::class)],
             'title' => ['required', 'string', 'max:120'],
             'body' => [
                 'required',
@@ -118,6 +128,7 @@ class HomeSectionController extends Controller
         ]);
 
         return [
+            'page' => SitePage::tryFrom($validated['page'] ?? '') ?? SitePage::Home,
             'title' => $validated['title'],
             'body' => $validated['body'],
             'is_visible' => $request->boolean('is_visible'),

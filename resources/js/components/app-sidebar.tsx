@@ -45,7 +45,7 @@ const mainNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
     {
-        title: 'Página de inicio',
+        title: 'Sitio público',
         href: homeContent(),
         icon: Home,
     },

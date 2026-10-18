@@ -14,11 +14,32 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $hero_image_path
  * @property string $semaphore_text
  * @property string $contact_text
+ * @property string|null $contact_email
+ * @property string|null $contact_phones
+ * @property string|null $contact_hours
+ * @property string|null $contact_address
+ * @property string|null $map_url Enlace a Google Maps de la oficina.
+ * @property string|null $facebook_url
+ * @property string|null $instagram_url
+ * @property string|null $tiktok_url
+ * @property string|null $youtube_url
  * @property-read string|null $hero_image_url
  */
-#[Fillable(['hero_title', 'hero_text', 'hero_image_path', 'semaphore_text', 'contact_text'])]
+#[Fillable([
+    'hero_title', 'hero_text', 'hero_image_path', 'semaphore_text', 'contact_text',
+    'contact_email', 'contact_phones', 'contact_hours', 'contact_address', 'map_url',
+    'facebook_url', 'instagram_url', 'tiktok_url', 'youtube_url',
+])]
 class HomeContent extends Model
 {
+    /**
+     * Datos de contacto y redes sociales que se muestran en la página «Contacto».
+     */
+    public const CONTACT_FIELDS = [
+        'contact_email', 'contact_phones', 'contact_hours', 'contact_address', 'map_url',
+        'facebook_url', 'instagram_url', 'tiktok_url', 'youtube_url',
+    ];
+
     /**
      * @var array<string, mixed>
      */

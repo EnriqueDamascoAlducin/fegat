@@ -8,15 +8,9 @@ type Post = PostSummary & {
     is_draft: boolean;
 };
 
-export default function BlogShow({
-    post,
-    showSemaphore,
-}: {
-    post: Post;
-    showSemaphore: boolean;
-}) {
+export default function BlogShow({ post }: { post: Post }) {
     return (
-        <PublicLayout showSemaphore={showSemaphore} showBlog>
+        <PublicLayout>
             <Head title={post.title}>
                 <meta name="description" content={post.excerpt} />
             </Head>

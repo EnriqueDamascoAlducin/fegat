@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\SitePage;
 use App\Support\RichText;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Sección informativa de la página pública (por ejemplo «¿Por qué elegirnos?»).
+ * Sección informativa de una página pública (por ejemplo «Misión» en «Quiénes somos»).
  *
+ * @property SitePage $page
  * @property string $title
  * @property string $body HTML del editor con formato, siempre saneado al guardar.
  * @property string|null $image_path
@@ -17,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $position
  * @property-read string|null $image_url
  */
-#[Fillable(['title', 'body', 'image_path', 'is_visible', 'position'])]
+#[Fillable(['page', 'title', 'body', 'image_path', 'is_visible', 'position'])]
 class HomeSection extends Model
 {
     /**
@@ -33,9 +36,20 @@ class HomeSection extends Model
     protected function casts(): array
     {
         return [
+            'page' => SitePage::class,
             'is_visible' => 'boolean',
             'position' => 'integer',
         ];
+    }
+
+    /**
+     * Secciones visibles de una página, en el orden elegido por el admin.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopePublishedOn(Builder $query, SitePage $page): void
+    {
+        $query->where('page', $page)->where('is_visible', true)->orderBy('position')->orderBy('id');
     }
 
     /**

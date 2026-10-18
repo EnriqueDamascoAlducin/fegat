@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
 
         VotingSetting::current();
 
+        $this->call(SiteContentSeeder::class);
+
         if (config('fegat.admin.email') && config('fegat.admin.password')) {
             User::query()->updateOrCreate(
                 ['email' => config('fegat.admin.email')],

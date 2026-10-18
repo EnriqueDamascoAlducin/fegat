@@ -16,7 +16,19 @@ import {
     update as updateSection,
 } from '@/routes/admin/sections';
 
-type Content = {
+type ContactDetails = {
+    contact_email: string | null;
+    contact_phones: string | null;
+    contact_hours: string | null;
+    contact_address: string | null;
+    map_url: string | null;
+    facebook_url: string | null;
+    instagram_url: string | null;
+    tiktok_url: string | null;
+    youtube_url: string | null;
+};
+
+type Content = ContactDetails & {
     hero_title: string;
     hero_text: string | null;
     semaphore_text: string;
@@ -24,8 +36,14 @@ type Content = {
     hero_image_url: string | null;
 };
 
+type SitePageOption = {
+    value: string;
+    label: string;
+};
+
 type Section = {
     id: number;
+    page: string;
     title: string;
     body: string;
     image_url: string | null;
@@ -40,12 +58,53 @@ const textareaClass =
 
 const IMAGE_HINT = 'PNG, JPG o WebP de hasta 2 MB.';
 
+const contactFields: {
+    name: keyof ContactDetails;
+    label: string;
+    type?: string;
+    placeholder?: string;
+    max?: number;
+}[] = [
+    {
+        name: 'contact_email',
+        label: 'Correo institucional',
+        type: 'email',
+        placeholder: 'contacto@fegat.mx',
+    },
+    {
+        name: 'contact_phones',
+        label: 'Teléfonos',
+        placeholder: '594 123 4567 · 55 1234 5678',
+    },
+    {
+        name: 'contact_hours',
+        label: 'Horario de atención',
+        placeholder: 'Lunes a viernes de 9:00 a 17:00',
+    },
+    { name: 'contact_address', label: 'Dirección de la oficina', max: 500 },
+    {
+        name: 'map_url',
+        label: 'Enlace de Google Maps',
+        type: 'url',
+        placeholder: 'https://maps.app.goo.gl/…',
+        max: 1000,
+    },
+    { name: 'facebook_url', label: 'Facebook', type: 'url' },
+    { name: 'instagram_url', label: 'Instagram', type: 'url' },
+    { name: 'tiktok_url', label: 'TikTok', type: 'url' },
+    { name: 'youtube_url', label: 'YouTube', type: 'url' },
+];
+
 function SectionFields({
     section,
+    pages,
+    defaultPage,
     errors,
     editorKey,
 }: {
     section?: Section;
+    pages: SitePageOption[];
+    defaultPage: string;
     errors: Record<string, string>;
     /** Cambia para vaciar el editor después de agregar una sección. */
     editorKey?: number;
@@ -55,13 +114,32 @@ function SectionFields({
     return (
         <div className="grid gap-4">
             <div className="grid gap-2">
+                <Label htmlFor={`page-${id}`}>Página</Label>
+                <select
+                    // Se reinicia al cambiar de pestaña para seguirla.
+                    key={section ? undefined : defaultPage}
+                    id={`page-${id}`}
+                    name="page"
+                    defaultValue={section?.page ?? defaultPage}
+                    className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                    {pages.map((page) => (
+                        <option key={page.value} value={page.value}>
+                            {page.label}
+                        </option>
+                    ))}
+                </select>
+                <InputError message={errors.page} />
+            </div>
+
+            <div className="grid gap-2">
                 <Label htmlFor={`title-${id}`}>Título</Label>
                 <Input
                     id={`title-${id}`}
                     name="title"
                     required
                     maxLength={120}
-                    placeholder="¿Por qué elegirnos?"
+                    placeholder="Misión"
                     defaultValue={section?.title}
                 />
                 <InputError message={errors.title} />
@@ -128,13 +206,21 @@ function SectionFields({
 
 export default function Home({
     content,
-    sections,
+    pages,
+    sections: allSections,
 }: {
     content: Content;
+    pages: SitePageOption[];
     sections: Section[];
 }) {
     const [editing, setEditing] = useState<number | null>(null);
     const [createKey, setCreateKey] = useState(0);
+    const [activePage, setActivePage] = useState(pages[0].value);
+    const sections = allSections.filter(
+        (section) => section.page === activePage,
+    );
+    const activeLabel =
+        pages.find((page) => page.value === activePage)?.label ?? '';
 
     const remove = (section: Section) => {
         if (confirm(`¿Eliminar la sección «${section.title}»?`)) {
@@ -152,12 +238,12 @@ export default function Home({
 
     return (
         <>
-            <Head title="Página de inicio" />
+            <Head title="Sitio público" />
 
             <div className="max-w-3xl space-y-10 p-4">
                 <Heading
-                    title="Página de inicio"
-                    description="Textos, imagen de portada y secciones informativas del sitio público."
+                    title="Sitio público"
+                    description="Portada, datos de contacto y secciones de cada página del sitio."
                 />
 
                 <Form
@@ -268,6 +354,44 @@ export default function Home({
                                 <InputError message={errors.contact_text} />
                             </div>
 
+                            <div className="space-y-4 border-t pt-5">
+                                <div>
+                                    <h3 className="font-medium">
+                                        Datos de contacto y redes
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Se muestran en la página «Contacto».
+                                        Deja vacío lo que no quieras publicar.
+                                    </p>
+                                </div>
+
+                                {contactFields.map((field) => (
+                                    <div key={field.name} className="grid gap-2">
+                                        <Label htmlFor={field.name}>
+                                            {field.label}
+                                        </Label>
+                                        <Input
+                                            id={field.name}
+                                            name={field.name}
+                                            type={field.type ?? 'text'}
+                                            maxLength={field.max ?? 255}
+                                            placeholder={
+                                                field.placeholder ??
+                                                (field.type === 'url'
+                                                    ? 'https://'
+                                                    : undefined)
+                                            }
+                                            defaultValue={
+                                                content[field.name] ?? ''
+                                            }
+                                        />
+                                        <InputError
+                                            message={errors[field.name]}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
                             <Button disabled={processing}>Guardar</Button>
                         </>
                     )}
@@ -276,9 +400,51 @@ export default function Home({
                 <div className="space-y-4">
                     <Heading
                         variant="small"
-                        title="Secciones informativas"
-                        description="Aparecen en el sitio entre el semáforo y los logos de las empresas, en este orden."
+                        title="Secciones de cada página"
+                        description="Textos con formato que aparecen en la página elegida, en este orden. En el inicio van después del semáforo y el clima."
                     />
+
+                    <div
+                        role="tablist"
+                        aria-label="Página"
+                        className="flex flex-wrap gap-2"
+                    >
+                        {pages.map((page) => {
+                            const count = allSections.filter(
+                                (section) => section.page === page.value,
+                            ).length;
+
+                            return (
+                                <Button
+                                    key={page.value}
+                                    type="button"
+                                    role="tab"
+                                    size="sm"
+                                    aria-selected={activePage === page.value}
+                                    variant={
+                                        activePage === page.value
+                                            ? 'default'
+                                            : 'outline'
+                                    }
+                                    onClick={() => {
+                                        setActivePage(page.value);
+                                        setEditing(null);
+                                    }}
+                                >
+                                    {page.label}
+                                    <span className="text-xs opacity-70">
+                                        {count}
+                                    </span>
+                                </Button>
+                            );
+                        })}
+                    </div>
+
+                    {sections.length === 0 && (
+                        <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                            «{activeLabel}» aún no tiene secciones.
+                        </p>
+                    )}
 
                     {sections.length > 0 && (
                         <ul className="divide-y rounded-2xl border">
@@ -295,6 +461,8 @@ export default function Home({
                                                 <>
                                                     <SectionFields
                                                         section={section}
+                                                        pages={pages}
+                                                        defaultPage={activePage}
                                                         errors={errors}
                                                     />
                                                     <div className="flex gap-2">
@@ -400,6 +568,8 @@ export default function Home({
                             <>
                                 <h3 className="font-medium">Agregar sección</h3>
                                 <SectionFields
+                                    pages={pages}
+                                    defaultPage={activePage}
                                     errors={errors}
                                     editorKey={createKey}
                                 />
@@ -416,7 +586,7 @@ export default function Home({
 Home.layout = {
     breadcrumbs: [
         {
-            title: 'Página de inicio',
+            title: 'Sitio público',
             href: edit(),
         },
     ],

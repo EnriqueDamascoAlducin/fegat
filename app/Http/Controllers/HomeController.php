@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SitePage;
 use App\Models\Company;
 use App\Models\HomeContent;
 use App\Models\HomeSection;
@@ -28,9 +29,7 @@ class HomeController extends Controller
             'content' => $content->only(['hero_title', 'hero_text', 'semaphore_text', 'contact_text']),
             'heroImage' => $content->hero_image_url ?? $this->defaultHeroImage(),
             'sections' => HomeSection::query()
-                ->where('is_visible', true)
-                ->orderBy('position')
-                ->orderBy('id')
+                ->publishedOn(SitePage::Home)
                 ->get(['id', 'title', 'body', 'image_path']),
             'posts' => Post::query()->published()->latest('published_at')->limit(3)->get()->map->toCard(),
             'companies' => Company::query()

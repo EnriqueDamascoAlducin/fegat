@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use App\Models\VotingSetting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,7 +17,6 @@ class BlogController extends Controller
                 ->latest('published_at')
                 ->paginate(9)
                 ->through(fn (Post $post) => $post->toCard()),
-            'showSemaphore' => VotingSetting::current()->public_visible,
         ]);
     }
 
@@ -35,7 +33,6 @@ class BlogController extends Controller
                 'body' => $post->body,
                 'is_draft' => ! $post->isPublished(),
             ],
-            'showSemaphore' => VotingSetting::current()->public_visible,
         ]);
     }
 }
