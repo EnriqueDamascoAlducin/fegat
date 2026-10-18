@@ -95,6 +95,9 @@ export default function PublicLayout({
                                 Semáforo
                             </a>
                         )}
+                        <a href="/#clima" className={navLink}>
+                            Clima
+                        </a>
                         {showBlog && (
                             <Link href={blog()} className={navLink}>
                                 Blog

@@ -29,4 +29,21 @@ return [
 
     'contact_email' => env('CONTACT_EMAIL'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Clima
+    |--------------------------------------------------------------------------
+    |
+    | Pronóstico de Open-Meteo (gratuito y sin clave) para la zona de vuelo.
+    | `morning_hours` es el rango de horas que se muestra para la jornada.
+    |
+    */
+
+    'weather' => [
+        'latitude' => (float) env('WEATHER_LATITUDE', 19.6925),
+        'longitude' => (float) env('WEATHER_LONGITUDE', -98.8438),
+        'cache_minutes' => (int) env('WEATHER_CACHE_MINUTES', 15),
+        'morning_hours' => [5, 10],
+    ],
+
 ];

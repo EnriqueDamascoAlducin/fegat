@@ -1,15 +1,16 @@
-import { Form, Head, Link, usePoll } from '@inertiajs/react';
+import { Deferred, Form, Head, Link, usePoll } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import PostCard from '@/components/public/post-card';
 import type { PostSummary } from '@/components/public/post-card';
 import SectionTitle from '@/components/public/section-title';
 import SemaphoreCard from '@/components/semaphore-card';
+import WeatherCard, { WeatherCardSkeleton } from '@/components/weather-card';
 import PublicLayout from '@/layouts/public-layout';
 import { describeSemaphore } from '@/lib/semaphore';
 import { cn } from '@/lib/utils';
 import { index as blogIndex } from '@/routes/blog';
 import { store as sendContact } from '@/routes/contact';
-import type { SemaphoreData, SemaphoreStatus } from '@/types';
+import type { SemaphoreData, SemaphoreStatus, WeatherData } from '@/types';
 
 type Company = {
     id: number;
@@ -153,8 +154,11 @@ export default function Welcome({
     posts,
     companies,
     heroImage,
+    weather,
 }: {
     semaphore: SemaphoreData | null;
+    /** Prop diferida: llega después de pintar la página. */
+    weather?: WeatherData | null;
     content: HomeContent;
     sections: HomeSection[];
     posts: PostSummary[];
@@ -241,6 +245,35 @@ export default function Welcome({
                             />
                         </section>
                     )}
+
+                    <section
+                        id="clima"
+                        className={cn(
+                            'scroll-mt-28 px-6 py-16',
+                            semaphore && 'pt-0',
+                        )}
+                    >
+                        <SectionTitle title="Clima en Teotihuacan">
+                            Condiciones actuales y pronóstico por hora para la
+                            mañana de vuelo.
+                        </SectionTitle>
+
+                        <Deferred
+                            data="weather"
+                            fallback={
+                                <WeatherCardSkeleton
+                                    tone="light"
+                                    className="mx-auto mt-10 max-w-4xl"
+                                />
+                            }
+                        >
+                            <WeatherCard
+                                weather={weather ?? null}
+                                tone="light"
+                                className="mx-auto mt-10 max-w-4xl shadow-[0_0_30px_rgba(0,0,0,0.15)]"
+                            />
+                        </Deferred>
+                    </section>
 
                     {sections.map((section, index) => (
                         <InfoSection

@@ -1,7 +1,8 @@
-import { Head, router, usePage, usePoll } from '@inertiajs/react';
+import { Deferred, Head, router, usePage, usePoll } from '@inertiajs/react';
 import { useState } from 'react';
 import InstallButton from '@/components/install-button';
 import SemaphoreCard from '@/components/semaphore-card';
+import WeatherCard, { WeatherCardSkeleton } from '@/components/weather-card';
 import { Button } from '@/components/ui/button';
 import VoteBadge from '@/components/vote-badge';
 import { COLOR_LABELS } from '@/lib/semaphore';
@@ -12,7 +13,12 @@ import {
     store as storeDecision,
 } from '@/routes/decision';
 import { store as storeVote } from '@/routes/votes';
-import type { SemaphoreData, VoteColor, VoteCounts } from '@/types';
+import type {
+    SemaphoreData,
+    VoteColor,
+    VoteCounts,
+    WeatherData,
+} from '@/types';
 
 type Detail = {
     counts: VoteCounts;
@@ -93,8 +99,11 @@ export default function Dashboard({
     decision,
     detail,
     publicVisible,
+    weather,
 }: {
     semaphore: SemaphoreData;
+    /** Prop diferida: llega después de pintar la página. */
+    weather?: WeatherData | null;
     canVote: boolean;
     canDecide: boolean;
     myVote: VoteColor | null;
@@ -106,7 +115,8 @@ export default function Dashboard({
     const [sending, setSending] = useState(false);
     const isOpen = semaphore.phase === 'open';
 
-    usePoll(15000);
+    // El clima tiene su propia caché; no hace falta pedirlo en cada sondeo.
+    usePoll(15000, { except: ['weather'] });
 
     const visitOptions = {
         preserveScroll: true,
@@ -122,6 +132,10 @@ export default function Dashboard({
                 <InstallButton className="self-start rounded-full border px-4 py-1.5 text-sm hover:bg-accent" />
 
                 <SemaphoreCard semaphore={semaphore} />
+
+                <Deferred data="weather" fallback={<WeatherCardSkeleton />}>
+                    <WeatherCard weather={weather ?? null} />
+                </Deferred>
 
                 {canDecide && (
                     <section className="rounded-2xl border p-6">

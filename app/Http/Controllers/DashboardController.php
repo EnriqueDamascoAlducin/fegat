@@ -7,6 +7,7 @@ use App\Models\FinalDecision;
 use App\Models\Vote;
 use App\Models\VotingSetting;
 use App\Services\Semaphore;
+use App\Services\Weather;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,7 +18,7 @@ class DashboardController extends Controller
      * Panel: la empresa ve solo su voto, el decisor fija el color publicado
      * y el super admin ve el detalle completo.
      */
-    public function __invoke(Request $request, Semaphore $semaphore): Response
+    public function __invoke(Request $request, Semaphore $semaphore, Weather $weather): Response
     {
         $user = $request->user();
         $status = $semaphore->status();
@@ -25,6 +26,7 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboard', [
             'semaphore' => $status,
+            'weather' => Inertia::defer(fn () => $weather->forecast($status['flight_date'])),
             'canVote' => $user->canVote(),
             'canDecide' => $user->isDecider(),
             'publicVisible' => VotingSetting::current()->public_visible,

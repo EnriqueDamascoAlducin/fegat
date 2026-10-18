@@ -8,6 +8,7 @@ use App\Models\HomeSection;
 use App\Models\Post;
 use App\Models\VotingSetting;
 use App\Services\Semaphore;
+use App\Services\Weather;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,12 +17,14 @@ class HomeController extends Controller
     /**
      * Página pública con el semáforo del día.
      */
-    public function __invoke(Semaphore $semaphore): Response
+    public function __invoke(Semaphore $semaphore, Weather $weather): Response
     {
         $content = HomeContent::current();
 
         return Inertia::render('welcome', [
             'semaphore' => VotingSetting::current()->public_visible ? $semaphore->status() : null,
+            // Diferido: la página no espera a Open-Meteo.
+            'weather' => Inertia::defer(fn () => $weather->forecast($semaphore->session()['flight_date'])),
             'content' => $content->only(['hero_title', 'hero_text', 'semaphore_text', 'contact_text']),
             'heroImage' => $content->hero_image_url ?? $this->defaultHeroImage(),
             'sections' => HomeSection::query()
