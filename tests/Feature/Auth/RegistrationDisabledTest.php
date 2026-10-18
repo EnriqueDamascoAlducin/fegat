@@ -26,12 +26,15 @@ class RegistrationDisabledTest extends TestCase
     {
         $this->get('/register')->assertNotFound();
 
-        $this->post('/register', [
+        // 405: la ruta comodín de páginas solo atiende GET.
+        $status = $this->post('/register', [
             'name' => 'Intruso',
             'email' => 'intruso@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-        ])->assertNotFound();
+        ])->getStatusCode();
+
+        $this->assertContains($status, [404, 405]);
 
         $this->assertDatabaseMissing(User::class, ['email' => 'intruso@example.com']);
         $this->assertGuest();

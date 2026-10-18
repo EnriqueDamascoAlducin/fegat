@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use App\Support\SiteLayout;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Textos fijos de la página pública que el super admin puede editar.
+ * Configuración general del sitio público (un solo registro): header, footer, datos de
+ * contacto y redes. La portada y los textos de cada página viven en App\Models\Page.
  *
- * @property string $hero_title
- * @property string|null $hero_text
- * @property string|null $hero_image_path
- * @property string $semaphore_text
- * @property string $contact_text
+ * Las columnas hero_*, semaphore_text y contact_text son del inicio anterior; su contenido
+ * se pasó a los bloques de la página de inicio y ya no se editan.
+ *
+ * @property array<string, mixed>|null $header
+ * @property array<string, mixed>|null $footer
+ * @property array<string, mixed>|null $blog Configuración del blog (ver App\Support\BlogSettings).
  * @property string|null $contact_email
  * @property string|null $contact_phones
  * @property string|null $contact_hours
@@ -23,17 +25,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $instagram_url
  * @property string|null $tiktok_url
  * @property string|null $youtube_url
- * @property-read string|null $hero_image_url
  */
 #[Fillable([
-    'hero_title', 'hero_text', 'hero_image_path', 'semaphore_text', 'contact_text',
+    'header', 'footer', 'blog',
     'contact_email', 'contact_phones', 'contact_hours', 'contact_address', 'map_url',
     'facebook_url', 'instagram_url', 'tiktok_url', 'youtube_url',
 ])]
 class HomeContent extends Model
 {
     /**
-     * Datos de contacto y redes sociales que se muestran en la página «Contacto».
+     * Datos de contacto y redes sociales que muestran el bloque «Contacto» y el footer.
      */
     public const CONTACT_FIELDS = [
         'contact_email', 'contact_phones', 'contact_hours', 'contact_address', 'map_url',
@@ -44,21 +45,32 @@ class HomeContent extends Model
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'hero_title' => 'Federación de Globos Aerostáticos Teotihuacan A.C',
-        'semaphore_text' => 'Las empresas asociadas evalúan las condiciones de cada jornada y deciden en conjunto si es viable volar.',
-        'contact_text' => 'Contáctanos para cualquier duda y/o aclaración.',
+        'hero_title' => 'Federación de Globos Aerostáticos Teotihuacán A.C.',
+        'semaphore_text' => '',
+        'contact_text' => '',
     ];
 
     /**
-     * @return Attribute<string|null, never>
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
      */
-    protected function heroImageUrl(): Attribute
+    protected function casts(): array
     {
-        return Attribute::get(fn () => $this->hero_image_path ? '/storage/'.$this->hero_image_path : null);
+        return [
+            'header' => 'array',
+            'footer' => 'array',
+            'blog' => 'array',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => SiteLayout::forget());
     }
 
     /**
-     * El contenido es un único registro; se crea con los textos originales.
+     * La configuración es un único registro.
      */
     public static function current(): self
     {

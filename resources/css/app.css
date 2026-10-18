@@ -263,3 +263,99 @@
 .rich-text img.ProseMirror-selectednode {
     outline: 3px solid var(--color-brand-soft);
 }
+
+/* Páginas por bloques: títulos y textos con formato que heredan el estilo del bloque. */
+.custom-rich-title :is(p, h2, h3, h4) {
+    margin: 0;
+    font: inherit;
+    line-height: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+}
+
+.custom-rich-title p:empty,
+.custom-rich-copy p:empty {
+    display: none;
+}
+
+.custom-rich-title a,
+.custom-rich-copy a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.custom-rich-copy :is(p, h2, h3, h4) {
+    margin: 0 0 0.75em;
+    font: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+.custom-rich-copy :is(p, h2, h3, h4):last-child {
+    margin-bottom: 0;
+}
+
+.custom-rich-copy :is(ul, ol) {
+    margin: 0.75em 0;
+    padding-left: 1.25rem;
+    list-style: revert;
+}
+
+.custom-page-rich :is(h2, h3, h4) {
+    margin: 1.2em 0 0.5em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--cp-primary);
+}
+
+.custom-page-rich h2 {
+    font-size: 1.9rem;
+}
+
+.custom-page-rich h3 {
+    font-size: 1.4rem;
+}
+
+.custom-page-rich p {
+    margin: 0 0 1em;
+}
+
+.custom-page-rich :is(ul, ol) {
+    margin: 1em 0;
+    padding-left: 1.4rem;
+    list-style: revert;
+}
+
+.custom-page-rich li {
+    margin: 0.35em 0;
+}
+
+.custom-page-rich li p {
+    margin: 0;
+}
+
+.custom-page-rich a {
+    color: var(--cp-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.custom-page-rich img {
+    max-width: 100%;
+    border-radius: var(--cp-radius);
+}
+
+.custom-page-rich blockquote {
+    margin: 1em 0;
+    border-left: 4px solid var(--cp-secondary);
+    padding-left: 1rem;
+    font-style: italic;
+}
+
+.custom-page-rich mark {
+    border-radius: 0.2em;
+    background-color: #fde68a;
+    padding: 0 0.15em;
+}

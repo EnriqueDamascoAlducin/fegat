@@ -1,10 +1,11 @@
 <?php
 
-use App\Enums\SitePage;
+use App\Http\Controllers\Admin\BlogSettingsController;
+use App\Http\Controllers\Admin\BlogTaxonomyController;
 use App\Http\Controllers\Admin\CompanyController;
-use App\Http\Controllers\Admin\HomeContentController;
-use App\Http\Controllers\Admin\HomeSectionController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\SiteLayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoteHistoryController;
 use App\Http\Controllers\Admin\VotingSettingController;
@@ -20,11 +21,12 @@ use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
-Route::get('contacto', [ContactController::class, 'show'])->name('contact.show');
 Route::post('contacto', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
 Route::get('blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('blog/feed.xml', [BlogController::class, 'feed'])->name('blog.feed');
+Route::get('blog/categoria/{slug}', [BlogController::class, 'category'])->name('blog.category');
+Route::get('blog/etiqueta/{slug}', [BlogController::class, 'tag'])->name('blog.tag');
 Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
-Route::get('{page}', PageController::class)->whereIn('page', SitePage::routable())->name('page');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
@@ -48,13 +50,31 @@ Route::middleware('auth')->group(function () {
 
         Route::get('historial', VoteHistoryController::class)->name('history');
 
-        Route::get('inicio', [HomeContentController::class, 'edit'])->name('home.edit');
-        Route::put('inicio', [HomeContentController::class, 'update'])->name('home.update');
-        Route::post('inicio/secciones', [HomeSectionController::class, 'store'])->name('sections.store');
-        Route::post('inicio/secciones/imagen', [HomeSectionController::class, 'image'])->name('sections.image');
-        Route::put('inicio/secciones/{section}', [HomeSectionController::class, 'update'])->name('sections.update');
-        Route::delete('inicio/secciones/{section}', [HomeSectionController::class, 'destroy'])->name('sections.destroy');
-        Route::post('inicio/secciones/{section}/mover', [HomeSectionController::class, 'move'])->name('sections.move');
+        Route::get('paginas', [AdminPageController::class, 'index'])->name('pages.index');
+        Route::post('paginas', [AdminPageController::class, 'store'])->name('pages.store');
+        Route::post('paginas/imagen', [AdminPageController::class, 'uploadImage'])->name('pages.upload-image');
+        Route::post('paginas/imagenes', [AdminPageController::class, 'uploadImages'])->name('pages.upload-images');
+        Route::get('paginas/{page}/editar', [AdminPageController::class, 'edit'])->name('pages.edit');
+        Route::put('paginas/{page}', [AdminPageController::class, 'update'])->name('pages.update');
+        Route::delete('paginas/{page}', [AdminPageController::class, 'destroy'])->name('pages.destroy');
+        Route::post('paginas/{page}/inicio', [AdminPageController::class, 'makeHome'])->name('pages.make-home');
+        Route::post('paginas/{page}/vista-previa', [AdminPageController::class, 'preview'])->name('pages.preview');
+        Route::get('paginas/{page}/vista-previa', [AdminPageController::class, 'showPreview'])->name('pages.preview.show');
+
+        Route::get('sitio', [SiteLayoutController::class, 'edit'])->name('site.edit');
+        Route::put('sitio/header', [SiteLayoutController::class, 'updateHeader'])->name('site.header');
+        Route::put('sitio/footer', [SiteLayoutController::class, 'updateFooter'])->name('site.footer');
+        Route::put('sitio/contacto', [SiteLayoutController::class, 'updateContact'])->name('site.contact');
+
+        Route::get('blog/categorias', [BlogTaxonomyController::class, 'index'])->name('blog.taxonomies');
+        Route::post('blog/categorias', [BlogTaxonomyController::class, 'storeCategory'])->name('blog.categories.store');
+        Route::put('blog/categorias/{category}', [BlogTaxonomyController::class, 'updateCategory'])->name('blog.categories.update');
+        Route::delete('blog/categorias/{category}', [BlogTaxonomyController::class, 'destroyCategory'])->name('blog.categories.destroy');
+        Route::post('blog/etiquetas', [BlogTaxonomyController::class, 'storeTag'])->name('blog.tags.store');
+        Route::put('blog/etiquetas/{tag}', [BlogTaxonomyController::class, 'updateTag'])->name('blog.tags.update');
+        Route::delete('blog/etiquetas/{tag}', [BlogTaxonomyController::class, 'destroyTag'])->name('blog.tags.destroy');
+        Route::get('blog/configuracion', [BlogSettingsController::class, 'edit'])->name('blog.settings.edit');
+        Route::put('blog/configuracion', [BlogSettingsController::class, 'update'])->name('blog.settings.update');
 
         Route::get('blog', [PostController::class, 'index'])->name('posts.index');
         Route::get('blog/crear', [PostController::class, 'create'])->name('posts.create');
@@ -67,3 +87,6 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+// Comodín al final: lo que no atienda ninguna otra ruta se busca como página del constructor.
+Route::get('{slug}', PageController::class)->fallback()->name('page');

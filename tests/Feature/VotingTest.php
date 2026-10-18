@@ -107,7 +107,7 @@ class VotingTest extends TestCase
 
         $this->get(route('home'))
             ->assertInertia(fn (Assert $page) => $page
-                ->component('welcome')
+                ->component('page')
                 ->where('semaphore.status', 'green')
                 ->where('semaphore.votes_count', 3)
                 ->missing('semaphore.counts')

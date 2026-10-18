@@ -9,7 +9,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 /** Páginas del sitio público: traen su propio PublicLayout, sin el panel. */
-const PUBLIC_PAGES = ['welcome', 'page', 'contact'];
+const PUBLIC_PAGES = ['page'];
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

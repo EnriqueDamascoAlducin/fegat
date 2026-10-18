@@ -3,10 +3,11 @@ import {
     Building2,
     ChartColumn,
     Clock,
+    FileText,
     History,
-    Home,
     LayoutGrid,
     Newspaper,
+    PanelsTopLeft,
     Users,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -24,8 +25,9 @@ import {
 import { dashboard, indicators } from '@/routes';
 import { history } from '@/routes/admin';
 import { index as companies } from '@/routes/admin/companies';
-import { edit as homeContent } from '@/routes/admin/home';
+import { index as pages } from '@/routes/admin/pages';
 import { index as posts } from '@/routes/admin/posts';
+import { edit as site } from '@/routes/admin/site';
 import { index as users } from '@/routes/admin/users';
 import { edit as voting } from '@/routes/admin/voting';
 import type { NavItem } from '@/types';
@@ -45,9 +47,14 @@ const mainNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
     {
+        title: 'Páginas',
+        href: pages(),
+        icon: FileText,
+    },
+    {
         title: 'Sitio público',
-        href: homeContent(),
-        icon: Home,
+        href: site(),
+        icon: PanelsTopLeft,
     },
     {
         title: 'Blog',

@@ -1,98 +1,46 @@
 import { Head, Link } from '@inertiajs/react';
-import { pill } from '@/components/public/buttons';
-import CompanyLogos from '@/components/public/company-logos';
-import type { Company } from '@/components/public/company-logos';
-import InfoSection from '@/components/public/info-section';
-import type { InfoSectionData } from '@/components/public/info-section';
-import SectionTitle from '@/components/public/section-title';
+import PageBlocks from '@/components/site/page-blocks';
+import type { PageData } from '@/components/site/page-blocks';
 import PublicLayout from '@/layouts/public-layout';
-import { cn } from '@/lib/utils';
-import { home } from '@/routes';
-import { show as contact } from '@/routes/contact';
+import type { PageContent } from '@/types/site';
 
-type SitePage = {
-    slug: 'nosotros' | 'proyectos' | 'transparencia' | 'donar';
-    title: string;
-    description: string;
+type Props = PageData & {
+    page: { id: number; title: string; url: string; is_home: boolean };
+    content: PageContent;
+    isPreview: boolean;
 };
 
-export default function Page({
-    page,
-    sections,
-    companies,
-}: {
-    page: SitePage;
-    sections: InfoSectionData[];
-    companies: Company[];
-}) {
+export default function Page({ page, content, isPreview, ...data }: Props) {
+    const seo = content.seo;
+    const title = seo.meta_title || (page.is_home ? 'Federación de Globos Aerostáticos Teotihuacán' : page.title);
+
     return (
-        <PublicLayout>
-            <Head title={page.title}>
-                <meta name="description" content={page.description} />
+        <PublicLayout transparentHero={page.is_home}>
+            <Head title={title}>
+                {seo.meta_description && <meta name="description" content={seo.meta_description} />}
+                <meta property="og:title" content={seo.og_title || title} />
+                {(seo.og_description || seo.meta_description) && (
+                    <meta property="og:description" content={seo.og_description || seo.meta_description} />
+                )}
+                {seo.og_image && <meta property="og:image" content={seo.og_image} />}
+                {isPreview && <meta name="robots" content="noindex" />}
             </Head>
 
-            <section className="bg-brand px-6 py-14 text-center text-white">
-                <h1 className="font-display text-4xl font-bold uppercase sm:text-5xl">
-                    {page.title}
-                </h1>
-                <p className="mx-auto mt-4 max-w-2xl text-lg text-white/85">
-                    {page.description}
-                </p>
-            </section>
+            {isPreview && (
+                <div className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-amber-500 px-4 py-2 text-sm font-semibold text-white">
+                    Vista previa · cambios sin guardar
+                    <Link href={`/admin/paginas/${page.id}/editar`} className="underline">
+                        Volver al editor
+                    </Link>
+                </div>
+            )}
 
             <main>
-                {sections.map((section, index) => (
-                    <InfoSection
-                        key={section.id}
-                        section={section}
-                        index={index}
-                    />
-                ))}
-
-                {sections.length === 0 && (
-                    <section className="px-6 py-20 text-center">
-                        <p className="text-lg text-neutral-500">
-                            Estamos preparando esta información.
-                        </p>
-                        <Link
-                            href={contact()}
-                            className={cn(pill, 'mt-6')}
-                        >
-                            Contáctanos
-                        </Link>
-                    </section>
-                )}
-
-                {page.slug === 'proyectos' && (
-                    <section className="px-6 py-16 text-center">
-                        <SectionTitle title="Semáforo de operación">
-                            Las empresas asociadas evalúan cada jornada si las
-                            condiciones permiten volar sobre la zona de las
-                            Pirámides.
-                        </SectionTitle>
-                        <Link
-                            href={`${home.url()}#semaforo`}
-                            className={cn(pill, 'mt-8')}
-                        >
-                            Ver el semáforo de hoy
-                        </Link>
-                    </section>
-                )}
-
-                {companies.length > 0 && (
-                    <section
-                        id="asociados"
-                        className={cn(
-                            'scroll-mt-28 px-6 py-16',
-                            sections.length % 2 === 0 && 'bg-[#f3f5fa]',
-                        )}
-                    >
-                        <SectionTitle title="Asociados">
-                            Empresas que integran la federación.
-                        </SectionTitle>
-                        <div className="mt-6">
-                            <CompanyLogos companies={companies} />
-                        </div>
+                {content.blocks.length > 0 ? (
+                    <PageBlocks blocks={content.blocks} theme={content.theme} data={data} />
+                ) : (
+                    <section className="px-6 py-24 text-center">
+                        <h1 className="font-display text-4xl font-bold text-brand uppercase">{page.title}</h1>
                     </section>
                 )}
             </main>

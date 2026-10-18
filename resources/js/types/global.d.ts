@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { SiteShared } from '@/types/site';
 
 declare module 'react' {
     interface InputHTMLAttributes<T> {
@@ -12,6 +13,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            site: SiteShared;
             [key: string]: unknown;
         };
     }

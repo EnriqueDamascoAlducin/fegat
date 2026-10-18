@@ -89,20 +89,26 @@ function csrfToken(): string {
 }
 
 /**
- * Editor con formato (Tiptap). Envía su HTML en un campo oculto llamado
- * `name`, así funciona dentro de un <Form> como cualquier otro campo.
+ * Editor con formato (Tiptap). Con `name` envía su HTML en un campo oculto, así funciona
+ * dentro de un <Form> como cualquier otro campo; con `onChange` avisa cada cambio
+ * (el constructor de páginas guarda los bloques en su propio estado).
  */
 export default function RichTextEditor({
     id,
     name,
     defaultValue = '',
     uploadUrl,
+    onChange,
+    compact = false,
 }: {
-    id: string;
-    name: string;
+    id?: string;
+    name?: string;
     defaultValue?: string;
     /** Si se indica, aparece el botón para insertar imágenes subiéndolas ahí. */
     uploadUrl?: string;
+    onChange?: (html: string) => void;
+    /** Altura mínima reducida, para títulos y descripciones cortas. */
+    compact?: boolean;
 }) {
     const [html, setHtml] = useState(defaultValue);
     const [uploading, setUploading] = useState(false);
@@ -130,14 +136,20 @@ export default function RichTextEditor({
         shouldRerenderOnTransaction: true,
         editorProps: {
             attributes: {
-                id,
+                ...(id ? { id } : {}),
                 role: 'textbox',
                 'aria-multiline': 'true',
-                class: 'rich-text min-h-48 px-3 py-2 text-sm outline-none',
+                class: cn(
+                    'rich-text px-3 py-2 text-sm outline-none',
+                    compact ? 'min-h-16' : 'min-h-48',
+                ),
             },
         },
-        onUpdate: ({ editor: current }) =>
-            setHtml(current.isEmpty ? '' : current.getHTML()),
+        onUpdate: ({ editor: current }) => {
+            const value = current.isEmpty ? '' : current.getHTML();
+            setHtml(value);
+            onChange?.(value);
+        },
     });
 
     if (!editor) {
@@ -387,7 +399,7 @@ export default function RichTextEditor({
             </div>
 
             <EditorContent editor={editor} />
-            <input type="hidden" name={name} value={html} readOnly />
+            {name && <input type="hidden" name={name} value={html} readOnly />}
         </div>
     );
 }
