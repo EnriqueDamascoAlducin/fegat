@@ -1,0 +1,15 @@
+# Hosting compartido: el dominio apunta a la raíz del proyecto, así que todo
+# se manda a public/ sin que aparezca en la dirección.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Nunca servir archivos ocultos (.env, .git, etc.) desde la raíz.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

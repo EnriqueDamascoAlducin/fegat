@@ -8,11 +8,14 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+/** Páginas del sitio público: traen su propio PublicLayout, sin el panel. */
+const PUBLIC_PAGES = ['welcome', 'page', 'contact'];
+
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'welcome' || name.startsWith('blog/'):
+            case PUBLIC_PAGES.includes(name) || name.startsWith('blog/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
