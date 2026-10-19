@@ -1,14 +1,15 @@
 // Service worker de FEGAT. Solo guarda archivos estáticos con hash; las páginas
 // y los datos (semáforo, votos) siempre se piden a la red para no mostrar un
 // resultado viejo ni dejar votos guardados en el dispositivo.
-const CACHE = 'fegat-static-v1';
+// Súbelo al cambiar offline.html o los íconos: al activarse borra las copias anteriores.
+const CACHE = 'fegat-static-v2';
 const OFFLINE_URL = '/offline.html';
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches
             .open(CACHE)
-            .then((cache) => cache.addAll([OFFLINE_URL, '/icons/icon-192.png']))
+            .then((cache) => cache.addAll([OFFLINE_URL, '/icons/icon-192.png?v=2']))
             .then(() => self.skipWaiting()),
     );
 });

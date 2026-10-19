@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ApiClientController;
 use App\Http\Controllers\Admin\BlogSettingsController;
 use App\Http\Controllers\Admin\BlogTaxonomyController;
 use App\Http\Controllers\Admin\CompanyController;
@@ -77,6 +78,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('historial', VoteHistoryController::class)->name('history');
+
+        Route::get('llaves-api', [ApiClientController::class, 'index'])->name('api-clients.index');
+        Route::post('llaves-api', [ApiClientController::class, 'store'])->name('api-clients.store');
+        Route::put('llaves-api/{apiClient}', [ApiClientController::class, 'update'])->name('api-clients.update');
+        Route::post('llaves-api/{apiClient}/regenerar', [ApiClientController::class, 'regenerate'])->name('api-clients.regenerate');
+        Route::delete('llaves-api/{apiClient}', [ApiClientController::class, 'destroy'])->name('api-clients.destroy');
 
         Route::get('visitantes', [LiveVisitorsController::class, 'index'])->name('visitors.index');
         Route::get('visitantes/reporte', [VisitorReportController::class, 'index'])->name('visitors.report');

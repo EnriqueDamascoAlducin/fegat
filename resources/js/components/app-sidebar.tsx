@@ -7,6 +7,7 @@ import {
     Clock,
     FileText,
     History,
+    KeyRound,
     LayoutGrid,
     Newspaper,
     PanelsTopLeft,
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard, indicators } from '@/routes';
 import { history } from '@/routes/admin';
+import { index as apiClients } from '@/routes/admin/api-clients';
 import { index as companies } from '@/routes/admin/companies';
 import { index as pages } from '@/routes/admin/pages';
 import { index as posts } from '@/routes/admin/posts';
@@ -93,6 +95,11 @@ const adminNavItems: NavItem[] = [
         title: 'Usuarios',
         href: users(),
         icon: Users,
+    },
+    {
+        title: 'Llaves de API',
+        href: apiClients(),
+        icon: KeyRound,
     },
 ];
 
