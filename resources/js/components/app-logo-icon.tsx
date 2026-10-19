@@ -1,11 +1,7 @@
-import type { SVGAttributes } from 'react';
+import type { ImgHTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
-export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
-    return (
-        <svg {...props} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="4" r="3.5" />
-            <circle cx="12" cy="12" r="3.5" />
-            <circle cx="12" cy="20" r="3.5" />
-        </svg>
-    );
+/** Globo de FEGAT (el logo sin la palabra), para el panel y las pantallas de acceso. */
+export default function AppLogoIcon({ className, alt = 'FEGAT', ...props }: ImgHTMLAttributes<HTMLImageElement>) {
+    return <img src="/images/fegat-balloon.png" alt={alt} {...props} className={cn('object-contain', className)} />;
 }
