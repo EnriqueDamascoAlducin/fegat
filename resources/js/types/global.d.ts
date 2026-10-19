@@ -14,6 +14,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             sidebarOpen: boolean;
             site: SiteShared;
+            liveVisitors: { enabled: boolean; interval: number };
             [key: string]: unknown;
         };
     }

@@ -3,10 +3,12 @@
 use App\Http\Controllers\Admin\BlogSettingsController;
 use App\Http\Controllers\Admin\BlogTaxonomyController;
 use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\LiveVisitorsController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\SiteLayoutController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VisitorReportController;
 use App\Http\Controllers\Admin\VoteHistoryController;
 use App\Http\Controllers\Admin\VotingSettingController;
 use App\Http\Controllers\BlogController;
@@ -16,9 +18,18 @@ use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SitePresenceController;
 use App\Http\Controllers\VoteController;
 use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\HandleAppearance;
+use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 Route::get('/', HomeController::class)->name('home');
 Route::post('contacto', [ContactController::class, 'store'])->middleware('throttle:5,1')->name('contact.store');
@@ -27,6 +38,23 @@ Route::get('blog/feed.xml', [BlogController::class, 'feed'])->name('blog.feed');
 Route::get('blog/categoria/{slug}', [BlogController::class, 'category'])->name('blog.category');
 Route::get('blog/etiqueta/{slug}', [BlogController::class, 'tag'])->name('blog.tag');
 Route::get('blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+
+// Latido de «visitantes en vivo». Se llama cada ~30 s por visitante, así que va sin
+// sesión (driver database = lectura + escritura por petición), sin cookies y sin
+// Inertia. Sin sesión no hay token CSRF: solo escribe la fila del propio navegador.
+Route::post('presencia', SitePresenceController::class)
+    ->middleware('throttle:120,1')
+    ->withoutMiddleware([
+        EncryptCookies::class,
+        AddQueuedCookiesToResponse::class,
+        StartSession::class,
+        ShareErrorsFromSession::class,
+        PreventRequestForgery::class,
+        HandleAppearance::class,
+        HandleInertiaRequests::class,
+        AddLinkHeadersForPreloadedAssets::class,
+    ])
+    ->name('presence');
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
@@ -49,6 +77,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('historial', VoteHistoryController::class)->name('history');
+
+        Route::get('visitantes', [LiveVisitorsController::class, 'index'])->name('visitors.index');
+        Route::get('visitantes/reporte', [VisitorReportController::class, 'index'])->name('visitors.report');
+        Route::get('visitantes/reporte/visitas', [VisitorReportController::class, 'visits'])->name('visitors.report.visits');
 
         Route::get('paginas', [AdminPageController::class, 'index'])->name('pages.index');
         Route::post('paginas', [AdminPageController::class, 'store'])->name('pages.store');

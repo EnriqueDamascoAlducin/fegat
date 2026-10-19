@@ -1,7 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
+    Activity,
     Building2,
     ChartColumn,
+    ChartLine,
     Clock,
     FileText,
     History,
@@ -28,6 +30,7 @@ import { index as companies } from '@/routes/admin/companies';
 import { index as pages } from '@/routes/admin/pages';
 import { index as posts } from '@/routes/admin/posts';
 import { edit as site } from '@/routes/admin/site';
+import { index as liveVisitors, report as visitorReport } from '@/routes/admin/visitors';
 import { index as users } from '@/routes/admin/users';
 import { edit as voting } from '@/routes/admin/voting';
 import type { NavItem } from '@/types';
@@ -60,6 +63,16 @@ const adminNavItems: NavItem[] = [
         title: 'Blog',
         href: posts(),
         icon: Newspaper,
+    },
+    {
+        title: 'Visitantes en vivo',
+        href: liveVisitors(),
+        icon: Activity,
+    },
+    {
+        title: 'Reporte de visitantes',
+        href: visitorReport(),
+        icon: ChartLine,
     },
     {
         title: 'Historial',

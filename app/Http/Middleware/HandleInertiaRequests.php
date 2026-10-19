@@ -45,6 +45,11 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // Header y footer del sitio público (en caché; ver SiteLayout).
             'site' => fn () => SiteLayout::shared(),
+            // Latido de «visitantes en vivo» del sitio público (ver SitePresenceController).
+            'liveVisitors' => [
+                'enabled' => (bool) config('live_visitors.enabled'),
+                'interval' => (int) config('live_visitors.heartbeat_seconds'),
+            ],
         ];
     }
 }

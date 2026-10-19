@@ -23,6 +23,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ElementType, ReactNode, SVGProps } from 'react';
 import InstallButton from '@/components/install-button';
 import { MY_FLIGHT_LOGO, MY_FLIGHT_URL } from '@/components/powered-by';
+import { useSitePresence } from '@/hooks/use-site-presence';
 import { cn } from '@/lib/utils';
 import { dashboard, login } from '@/routes';
 import type { FooterData, HeaderCta, HeaderData, NavItem, SiteLink, SiteShared } from '@/types/site';
@@ -527,6 +528,7 @@ function PublicFooter({ footer, socials, contact }: { footer: FooterData; social
  */
 export default function PublicLayout({ children, transparentHero = false }: { children: ReactNode; transparentHero?: boolean }) {
     const { site } = usePage().props;
+    useSitePresence();
     const transparent = transparentHero && site.header.transparent_home;
 
     return (
