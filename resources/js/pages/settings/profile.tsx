@@ -105,6 +105,32 @@ export default function Profile() {
                                 />
                             </div>
 
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone">
+                                    WhatsApp (opcional)
+                                </Label>
+
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.phone ?? ''}
+                                    name="phone"
+                                    autoComplete="tel"
+                                    placeholder="55 1234 5678"
+                                />
+
+                                <p className="text-sm text-muted-foreground">
+                                    Si tu empresa vota por WhatsApp, aquí te
+                                    llegarán el recordatorio y la encuesta.
+                                </p>
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.phone}
+                                />
+                            </div>
+
                             <div className="flex items-center gap-4">
                                 <Button
                                     disabled={processing}

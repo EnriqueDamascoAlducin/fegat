@@ -11,8 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $flight_date Fecha de vuelo en formato Y-m-d.
  * @property VoteColor|null $from_color
  * @property VoteColor $to_color
+ * @property string $channel «web» o «whatsapp».
  */
-#[Fillable(['vote_id', 'company_id', 'flight_date', 'user_id', 'user_name', 'from_color', 'to_color'])]
+#[Fillable(['vote_id', 'company_id', 'flight_date', 'user_id', 'user_name', 'from_color', 'to_color', 'channel'])]
 class VoteChange extends Model
 {
     const UPDATED_AT = null;

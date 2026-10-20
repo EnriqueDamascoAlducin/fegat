@@ -13,6 +13,7 @@ type Change = {
     is_decision: boolean;
     company: string;
     user_name: string;
+    channel: 'web' | 'whatsapp' | null;
     from_color: VoteColor | null;
     to_color: VoteColor | null;
     at: string | null;
@@ -105,6 +106,11 @@ export default function History({
                                         </td>
                                         <td className="py-2 pr-4">
                                             {change.user_name}
+                                            {change.channel === 'whatsapp' && (
+                                                <span className="ml-2 rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+                                                    WhatsApp
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="py-2">
                                             {change.from_color && (

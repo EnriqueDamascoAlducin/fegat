@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitorReportController;
 use App\Http\Controllers\Admin\VoteHistoryController;
 use App\Http\Controllers\Admin\VotingSettingController;
+use App\Http\Controllers\Admin\WhatsAppTestController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -67,6 +68,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware(EnsureSuperAdmin::class)->prefix('admin')->name('admin.')->group(function () {
         Route::get('votacion', [VotingSettingController::class, 'edit'])->name('voting.edit');
         Route::put('votacion', [VotingSettingController::class, 'update'])->name('voting.update');
+        Route::post('votacion/whatsapp-prueba', WhatsAppTestController::class)
+            ->middleware('throttle:10,1')
+            ->name('voting.whatsapp-test');
 
         Route::get('empresas', [CompanyController::class, 'index'])->name('companies.index');
         Route::post('empresas', [CompanyController::class, 'store'])->name('companies.store');

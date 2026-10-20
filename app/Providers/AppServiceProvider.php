@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\WhatsAppSender;
 use App\Http\Middleware\AuthenticateApiClient;
+use App\Support\WhatsApp\TwilioWhatsApp;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -19,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(WhatsAppSender::class, TwilioWhatsApp::class);
     }
 
     /**

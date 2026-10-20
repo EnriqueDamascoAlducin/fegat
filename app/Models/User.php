@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Support\PhoneNumber;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -21,6 +22,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $name
  * @property string $email
  * @property string|null $username Alias para iniciar sesión sin escribir el correo.
+ * @property string|null $phone WhatsApp en formato E.164 (+52…), para votar por WhatsApp.
  * @property UserRole $role
  * @property int|null $company_id
  * @property Carbon|null $email_verified_at
@@ -32,7 +34,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'username', 'password', 'role', 'company_id'])]
+#[Fillable(['name', 'email', 'username', 'phone', 'password', 'role', 'company_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -62,6 +64,26 @@ class User extends Authenticatable implements PasskeyUser
     protected function username(): Attribute
     {
         return Attribute::set(fn (?string $value) => filled($value) ? mb_strtolower(trim($value)) : null);
+    }
+
+    /**
+     * El teléfono se guarda normalizado para encontrar al remitente de un WhatsApp.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function phone(): Attribute
+    {
+        return Attribute::set(fn (?string $value) => PhoneNumber::normalize($value));
+    }
+
+    /**
+     * Usuario dueño del número que escribió por WhatsApp («whatsapp:+52…»).
+     */
+    public static function findByWhatsApp(string $from): ?self
+    {
+        $phone = PhoneNumber::normalize($from);
+
+        return $phone ? static::query()->where('phone', $phone)->first() : null;
     }
 
     /**

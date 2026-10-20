@@ -13,6 +13,7 @@ type UserRow = {
     name: string;
     email: string;
     username: string | null;
+    phone: string | null;
     role: UserRole;
     company_id: number | null;
     company_name: string | null;
@@ -82,6 +83,19 @@ function UserFields({
                     defaultValue={user?.username ?? ''}
                 />
                 <InputError message={errors.username} />
+            </div>
+
+            <div className="grid gap-2">
+                <Label htmlFor={`phone-${id}`}>WhatsApp (opcional)</Label>
+                <Input
+                    id={`phone-${id}`}
+                    name="phone"
+                    type="tel"
+                    autoComplete="off"
+                    placeholder="55 1234 5678"
+                    defaultValue={user?.phone ?? ''}
+                />
+                <InputError message={errors.phone} />
             </div>
 
             <div className="grid gap-2">
