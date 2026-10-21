@@ -51,7 +51,7 @@ class SendVotingReminders extends Command
             ->whereNotNull('phone')
             ->whereHas('company', fn ($query) => $query->where('is_active', true))
             ->whereNotIn('company_id', Vote::query()->select('company_id')->where('flight_date', $flightDate))
-            ->whereNotIn('id', WhatsappReminder::query()->select('user_id')->where('flight_date', $flightDate))
+            ->whereNotIn('id', WhatsappReminder::query()->select('user_id')->where('flight_date', $flightDate)->where('kind', 'reminder'))
             ->get();
 
         foreach ($recipients as $user) {
@@ -60,6 +60,7 @@ class SendVotingReminders extends Command
                 $reminder = WhatsappReminder::query()->create([
                     'flight_date' => $flightDate,
                     'user_id' => $user->id,
+                    'kind' => 'reminder',
                     'status' => 'sent',
                 ]);
             } catch (UniqueConstraintViolationException) {

@@ -11,10 +11,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * deja constancia de si falló.
  *
  * @property string $flight_date
+ * @property 'reminder'|'summary' $kind Recordatorio de votación o resumen diario.
  * @property 'sent'|'failed' $status
  * @property string|null $error
  */
-#[Fillable(['flight_date', 'user_id', 'status', 'error'])]
+#[Fillable(['flight_date', 'user_id', 'kind', 'status', 'error'])]
 class WhatsappReminder extends Model
 {
     /**

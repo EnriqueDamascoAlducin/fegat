@@ -35,6 +35,8 @@ class UserController extends Controller
                     'role' => $user->role->value,
                     'company_id' => $user->company_id,
                     'company_name' => $user->company?->name,
+                    'two_factor' => $user->two_factor_confirmed_at !== null,
+                    'created_at' => $user->created_at?->toDateString(),
                 ]),
             'companies' => Company::query()->orderBy('name')->get(['id', 'name']),
         ]);

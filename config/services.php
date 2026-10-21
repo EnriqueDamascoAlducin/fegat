@@ -37,6 +37,7 @@ return [
         // Plantillas aprobadas (Content SID «HX…»).
         'template_vote_reminder' => env('TWILIO_TEMPLATE_VOTE_REMINDER'),
         'template_vote_poll' => env('TWILIO_TEMPLATE_VOTE_POLL'),
+        'template_daily_summary' => env('TWILIO_TEMPLATE_DAILY_SUMMARY'),
         // URL pública exacta configurada en Twilio, si el servidor está detrás de un proxy.
         'webhook_url' => env('TWILIO_WEBHOOK_URL'),
     ],

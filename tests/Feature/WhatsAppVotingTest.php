@@ -30,6 +30,7 @@ class WhatsAppVotingTest extends TestCase
             'services.twilio.whatsapp_from' => 'whatsapp:+14155238886',
             'services.twilio.template_vote_reminder' => 'HX_recordatorio',
             'services.twilio.template_vote_poll' => 'HX_encuesta',
+            'services.twilio.template_daily_summary' => 'HX_resumen',
             'services.twilio.webhook_url' => null,
         ]);
 
@@ -203,6 +204,74 @@ class WhatsAppVotingTest extends TestCase
             ->assertForbidden();
 
         $this->assertSame([], $this->whatsApp->sent);
+    }
+
+    public function test_the_daily_summary_goes_to_super_admins_once_after_the_configured_time()
+    {
+        VotingSetting::current()->update(['summary_enabled' => true, 'summary_at' => '12:00']);
+        $admin = User::factory()->superAdmin()->create(['phone' => '5599999999']);
+        User::factory()->superAdmin()->create(['phone' => null]);
+        $green = User::factory()->forCompany(Company::factory()->create(['name' => 'Aerostat']))->create(['name' => 'Juan', 'phone' => '5511111111']);
+        $red = User::factory()->forCompany(Company::factory()->create(['name' => 'Volare']))->create(['phone' => '5522222222']);
+        Company::factory()->create(['name' => 'Sky Balloons']);
+
+        // Antes de la hora no se manda nada.
+        $this->artisan('fegat:whatsapp-resumen');
+        $this->assertSame([], $this->whatsApp->sent);
+
+        $this->travelTo('2026-10-12 06:30');
+        Vote::query()->create(['company_id' => $green->company_id, 'flight_date' => '2026-10-12', 'color' => 'green', 'user_id' => $green->id]);
+        Vote::query()->create(['company_id' => $red->company_id, 'flight_date' => '2026-10-12', 'color' => 'red', 'user_id' => $red->id]);
+
+        $this->travelTo('2026-10-12 12:05');
+        $this->artisan('fegat:whatsapp-resumen');
+        $this->artisan('fegat:whatsapp-resumen');
+
+        $this->assertCount(1, $this->whatsApp->sent);
+        $message = $this->whatsApp->sent[0];
+        $this->assertSame('+525599999999', $message['to']);
+        $this->assertSame('HX_resumen', $message['template']);
+        $this->assertSame('Se cancela (rojo)', $message['variables']['2']);
+        $this->assertSame('2 de 3 empresas', $message['variables']['3']);
+        $this->assertSame('Verde 1 · Amarillo 0 · Rojo 1', $message['variables']['4']);
+        $this->assertStringContainsString('Aerostat: Verde (Juan)', $message['variables']['5']);
+        $this->assertStringContainsString('Sin voto: Sky Balloons', $message['variables']['5']);
+        $this->assertDatabaseHas(WhatsappReminder::class, ['user_id' => $admin->id, 'kind' => 'summary', 'flight_date' => '2026-10-12']);
+    }
+
+    public function test_the_summary_and_the_reminder_are_tracked_separately()
+    {
+        VotingSetting::current()->update(['summary_enabled' => true, 'summary_at' => '06:00']);
+        // Un super admin con número no recibe recordatorio, pero sí resumen.
+        User::factory()->superAdmin()->create(['phone' => '5599999999']);
+        User::factory()->forCompany()->create(['phone' => '5511111111']);
+
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->artisan('fegat:whatsapp-resumen');
+
+        $this->assertSame(['HX_recordatorio', 'HX_encuesta', 'HX_resumen'], array_column($this->whatsApp->sent, 'template'));
+    }
+
+    public function test_the_summary_is_not_sent_when_disabled()
+    {
+        $this->travelTo('2026-10-12 13:00');
+        User::factory()->superAdmin()->create(['phone' => '5599999999']);
+
+        $this->artisan('fegat:whatsapp-resumen');
+
+        $this->assertSame([], $this->whatsApp->sent);
+    }
+
+    public function test_the_super_admin_can_test_the_summary()
+    {
+        $admin = User::factory()->superAdmin()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.voting.whatsapp-test'), ['test_phone' => '5512345678', 'test_type' => 'summary'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(['HX_resumen'], array_column($this->whatsApp->sent, 'template'));
+        $this->assertSame('Sin resultado: no se alcanzó el mínimo de votos', $this->whatsApp->sent[0]['variables']['2']);
     }
 
     public function test_phones_are_normalized_and_cannot_be_repeated()

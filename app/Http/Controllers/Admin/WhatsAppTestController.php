@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\Semaphore;
 use App\Support\PhoneNumber;
+use App\Support\WhatsApp\DailySummary;
 use App\Support\WhatsApp\VotingMessages;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Throwable;
@@ -21,7 +23,7 @@ class WhatsAppTestController extends Controller
      * plantillas y webhook sin esperar a que abra la votación. No registra
      * recordatorios ni depende del interruptor de «Votar por WhatsApp».
      */
-    public function __invoke(Request $request, Semaphore $semaphore, VotingMessages $messages): RedirectResponse
+    public function __invoke(Request $request, Semaphore $semaphore, VotingMessages $messages, DailySummary $summary): RedirectResponse
     {
         $validated = $request->validate([
             'test_phone' => [
@@ -33,17 +35,23 @@ class WhatsAppTestController extends Controller
                     : null,
             ],
             'test_company' => ['nullable', 'string', 'max:100'],
+            'test_type' => ['nullable', Rule::in(['vote', 'summary'])],
         ]);
 
         $phone = PhoneNumber::normalize($validated['test_phone']);
 
         try {
-            $messages->send(
-                $phone,
-                $request->user()->name,
-                ($validated['test_company'] ?? null) ?: 'Empresa de prueba',
-                $semaphore->session(),
-            );
+            if (($validated['test_type'] ?? 'vote') === 'summary') {
+                // El resumen real de hoy, con los votos que haya hasta ahora.
+                $summary->send($phone, now()->toDateString());
+            } else {
+                $messages->send(
+                    $phone,
+                    $request->user()->name,
+                    ($validated['test_company'] ?? null) ?: 'Empresa de prueba',
+                    $semaphore->session(),
+                );
+            }
         } catch (Throwable $exception) {
             report($exception);
 

@@ -62,6 +62,33 @@ Verde: volamos. Amarillo: en espera. Rojo: se cancela.
 Ejemplos para Meta: {{1}} = Aerostat, {{2}} = lunes 19 de octubre. Envía a
 aprobación como **Utility**.
 
+## Paso 2b. Crear la plantilla del resumen diario (super admin)
+
+- **Nombre:** `fegat_resumen_diario`
+- **Idioma:** Spanish (MEX) · **Tipo:** Text · **Categoría:** Utility
+- **Cuerpo:**
+
+```
+Resumen del semáforo de FEGAT del {{1}}.
+
+Resultado: {{2}}
+Votaron {{3}}: {{4}}.
+
+Detalle: {{5}}
+
+Consulta el historial completo en el panel.
+```
+
+| Variable | Qué envía el sistema | Ejemplo para Meta |
+|---|---|---|
+| {{1}} | Fecha de la jornada | martes 21 de octubre |
+| {{2}} | Resultado | Volamos (verde) |
+| {{3}} | Participación | 6 de 8 empresas |
+| {{4}} | Conteo por color | Verde 4 · Amarillo 1 · Rojo 1 |
+| {{5}} | Voto de cada empresa y quién falta | Aerostat: Verde (Juan Pérez) · Volare: Rojo (Ana López) · Sin voto: Sky Balloons |
+
+Su Content SID va en `TWILIO_TEMPLATE_DAILY_SUMMARY`.
+
 > La aprobación suele tardar de minutos a un par de días. Mientras tanto puedes
 > seguir con los pasos 3 a 6; la prueba del paso 7 fallará hasta que estén aprobadas.
 
@@ -76,6 +103,7 @@ TWILIO_AUTH_TOKEN=...
 TWILIO_WHATSAPP_FROM=whatsapp:+52...
 TWILIO_TEMPLATE_VOTE_REMINDER=HX...
 TWILIO_TEMPLATE_VOTE_POLL=HX...
+TWILIO_TEMPLATE_DAILY_SUMMARY=HX...
 TWILIO_WEBHOOK_URL=
 ```
 
@@ -131,6 +159,9 @@ Diez dígitos se toman como número de México (`55 1234 5678` → `+52551234567
    contesta explicando por qué no votó, lo que también confirma que el webhook funciona.
 5. El voto aparece en **Historial** con la etiqueta «WhatsApp».
 
+Para el resumen: registra tu WhatsApp en tu usuario (super admin) y usa
+**Probar resumen de hoy**. Llega el resumen real con los votos que haya hasta ese momento.
+
 ## Paso 8. Activar
 
 Panel → **Votación** → marca **Votar por WhatsApp** → **Guardar**.
@@ -139,6 +170,10 @@ Desde la siguiente apertura, cada administrador con WhatsApp cuya empresa no hay
 votado recibirá los dos mensajes una sola vez por jornada (tabla
 `whatsapp_reminders`). Si un envío falla, queda con `status = failed` y el error,
 y no se reintenta solo.
+
+Para el resumen diario: marca **Resumen diario para super admin**, elige la hora
+(12:00 por omisión) y guarda. Cada super admin con WhatsApp lo recibe una vez al
+día a partir de esa hora (`kind = summary` en la misma tabla).
 
 ---
 

@@ -18,3 +18,8 @@ Schedule::command('site:visitors-snapshot')
 Schedule::command('fegat:whatsapp-recordatorios')
     ->everyMinute()
     ->withoutOverlapping();
+
+// Resumen diario de votos para los super admin, a partir de la hora configurada.
+Schedule::command('fegat:whatsapp-resumen')
+    ->everyMinute()
+    ->withoutOverlapping();

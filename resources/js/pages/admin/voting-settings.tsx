@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { useRef } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,8 @@ type Settings = {
     closes_at: string;
     public_visible: boolean;
     whatsapp_enabled: boolean;
+    summary_enabled: boolean;
+    summary_at: string;
 };
 
 export default function VotingSettings({
@@ -21,11 +24,15 @@ export default function VotingSettings({
     settings: Settings;
     whatsapp: {
         configured: boolean;
+        summary_configured: boolean;
+        admins_with_phone: number;
         with_phone: number;
         test_phone: string | null;
         webhook_url: string;
     };
 }) {
+    const testType = useRef<HTMLInputElement>(null);
+
     return (
         <>
             <Head title="Configuración de votación" />
@@ -159,6 +166,56 @@ export default function VotingSettings({
                                 </p>
                             </div>
 
+                            <div className="rounded-xl border p-4">
+                                <label className="flex items-start gap-3">
+                                    <input
+                                        type="checkbox"
+                                        name="summary_enabled"
+                                        value="1"
+                                        defaultChecked={
+                                            settings.summary_enabled
+                                        }
+                                        className="mt-1 size-4"
+                                    />
+                                    <span>
+                                        <span className="block font-medium">
+                                            Resumen diario para super admin
+                                        </span>
+                                        <span className="block text-sm text-muted-foreground">
+                                            Cada día, a la hora indicada, los
+                                            super admin con WhatsApp reciben el
+                                            resultado de la jornada, cuántas
+                                            empresas votaron, qué votó cada una
+                                            y quién falta.
+                                        </span>
+                                    </span>
+                                </label>
+                                <div className="mt-4 grid max-w-40 gap-2 pl-7">
+                                    <Label htmlFor="summary_at">
+                                        Hora del resumen
+                                    </Label>
+                                    <Input
+                                        id="summary_at"
+                                        name="summary_at"
+                                        type="time"
+                                        required
+                                        defaultValue={settings.summary_at}
+                                    />
+                                    <InputError message={errors.summary_at} />
+                                </div>
+                                <p
+                                    className={
+                                        whatsapp.summary_configured
+                                            ? 'mt-3 text-sm text-muted-foreground'
+                                            : 'mt-3 text-sm text-amber-700 dark:text-amber-400'
+                                    }
+                                >
+                                    {whatsapp.summary_configured
+                                        ? `Plantilla configurada · ${whatsapp.admins_with_phone} super ${whatsapp.admins_with_phone === 1 ? 'admin' : 'admins'} con WhatsApp.`
+                                        : 'Falta la plantilla del resumen (TWILIO_TEMPLATE_DAILY_SUMMARY); mientras tanto no se envía.'}
+                                </p>
+                            </div>
+
                             <Button disabled={processing}>Guardar</Button>
                         </>
                     )}
@@ -170,9 +227,9 @@ export default function VotingSettings({
                             Probar mensajes de WhatsApp
                         </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Envía ahora el recordatorio y la encuesta reales a
-                            un número, sin esperar a que abra la votación. No
-                            cuenta como recordatorio de la jornada.
+                            Envía ahora el recordatorio y la encuesta, o el
+                            resumen de hoy, a un número. No cuenta como envío de
+                            la jornada.
                         </p>
                     </div>
 
@@ -212,14 +269,44 @@ export default function VotingSettings({
                                 </div>
                                 <InputError message={errors.test_phone} />
 
-                                <Button
-                                    variant="outline"
-                                    disabled={
-                                        processing || !whatsapp.configured
-                                    }
-                                >
-                                    Enviar prueba
-                                </Button>
+                                {/* Lo fija el botón que se presione. */}
+                                <input
+                                    ref={testType}
+                                    type="hidden"
+                                    name="test_type"
+                                    defaultValue="vote"
+                                />
+
+                                <div className="flex flex-wrap gap-2">
+                                    <Button
+                                        variant="outline"
+                                        disabled={
+                                            processing || !whatsapp.configured
+                                        }
+                                        onClick={() => {
+                                            if (testType.current) {
+                                                testType.current.value = 'vote';
+                                            }
+                                        }}
+                                    >
+                                        Probar recordatorio y encuesta
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        disabled={
+                                            processing ||
+                                            !whatsapp.summary_configured
+                                        }
+                                        onClick={() => {
+                                            if (testType.current) {
+                                                testType.current.value =
+                                                    'summary';
+                                            }
+                                        }}
+                                    >
+                                        Probar resumen de hoy
+                                    </Button>
+                                </div>
                             </>
                         )}
                     </Form>

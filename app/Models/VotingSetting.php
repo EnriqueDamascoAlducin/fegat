@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $closes_at Hora de cierre en formato H:i.
  * @property bool $public_visible Si el semáforo se muestra en la página pública.
  * @property bool $whatsapp_enabled Si al abrir la votación se manda recordatorio y encuesta por WhatsApp.
+ * @property bool $summary_enabled Si los super admin reciben el resumen diario por WhatsApp.
+ * @property string $summary_at Hora del resumen diario en formato H:i.
  */
-#[Fillable(['min_votes', 'opens_at', 'closes_at', 'public_visible', 'whatsapp_enabled'])]
+#[Fillable(['min_votes', 'opens_at', 'closes_at', 'public_visible', 'whatsapp_enabled', 'summary_enabled', 'summary_at'])]
 class VotingSetting extends Model
 {
     /**
@@ -33,6 +35,7 @@ class VotingSetting extends Model
             'min_votes' => 'integer',
             'public_visible' => 'boolean',
             'whatsapp_enabled' => 'boolean',
+            'summary_enabled' => 'boolean',
         ];
     }
 
