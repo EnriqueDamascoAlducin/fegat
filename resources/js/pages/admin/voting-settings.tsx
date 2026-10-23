@@ -13,6 +13,8 @@ type Settings = {
     closes_at: string;
     public_visible: boolean;
     whatsapp_enabled: boolean;
+    reminder_first_at: string;
+    reminder_second_at: string | null;
     summary_enabled: boolean;
     summary_at: string;
 };
@@ -140,19 +142,62 @@ export default function VotingSettings({
                                     />
                                     <span>
                                         <span className="block font-medium">
-                                            Votar por WhatsApp
+                                            Notificar por WhatsApp
                                         </span>
                                         <span className="block text-sm text-muted-foreground">
-                                            Al abrir la votación, cada
+                                            A cada hora indicada, cada
                                             administrador de empresa con
                                             WhatsApp registrado recibe un
                                             recordatorio con el enlace y una
                                             encuesta para votar respondiendo
                                             Verde, Amarillo o Rojo. Solo se
-                                            envía a empresas que aún no votan.
+                                            envía a empresas que aún no votan,
+                                            así que el segundo envío llega solo
+                                            a quien sigue sin votar.
                                         </span>
                                     </span>
                                 </label>
+                                <div className="mt-4 grid gap-4 pl-7 sm:grid-cols-2">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="reminder_first_at">
+                                            Primer envío
+                                        </Label>
+                                        <Input
+                                            id="reminder_first_at"
+                                            name="reminder_first_at"
+                                            type="time"
+                                            required
+                                            defaultValue={
+                                                settings.reminder_first_at
+                                            }
+                                        />
+                                        <InputError
+                                            message={errors.reminder_first_at}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="reminder_second_at">
+                                            Segundo envío (opcional)
+                                        </Label>
+                                        <Input
+                                            id="reminder_second_at"
+                                            name="reminder_second_at"
+                                            type="time"
+                                            defaultValue={
+                                                settings.reminder_second_at ??
+                                                ''
+                                            }
+                                        />
+                                        <InputError
+                                            message={errors.reminder_second_at}
+                                        />
+                                    </div>
+                                </div>
+                                <p className="mt-2 pl-7 text-sm text-muted-foreground">
+                                    Ambas horas deben caer dentro del horario
+                                    de votación. Deja vacío el segundo para
+                                    enviarlo una sola vez.
+                                </p>
                                 <p
                                     className={
                                         whatsapp.configured

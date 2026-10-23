@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * deja constancia de si falló.
  *
  * @property string $flight_date
- * @property 'reminder'|'summary' $kind Recordatorio de votación o resumen diario.
+ * @property 'reminder'|'reminder_2'|'summary' $kind Primer o segundo recordatorio de votación, o resumen diario.
  * @property 'sent'|'failed' $status
  * @property string|null $error
  */

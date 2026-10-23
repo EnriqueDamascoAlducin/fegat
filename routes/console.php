@@ -14,7 +14,7 @@ Schedule::command('site:visitors-snapshot')
     ->everyFiveMinutes()
     ->withoutOverlapping();
 
-// Votación por WhatsApp: recordatorio y encuesta en cuanto abre la votación.
+// Votación por WhatsApp: recordatorio y encuesta a las dos horas configuradas.
 Schedule::command('fegat:whatsapp-recordatorios')
     ->everyMinute()
     ->withoutOverlapping();

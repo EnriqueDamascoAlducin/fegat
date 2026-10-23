@@ -104,6 +104,93 @@ class WhatsAppVotingTest extends TestCase
         $this->assertSame([], $this->whatsApp->sent);
     }
 
+    public function test_it_waits_for_the_first_time_and_repeats_at_the_second_to_those_who_have_not_voted()
+    {
+        VotingSetting::current()->update(['reminder_first_at' => '06:00', 'reminder_second_at' => '06:30']);
+        $pending = User::factory()->forCompany()->create(['phone' => '5511111111']);
+        $voter = User::factory()->forCompany()->create(['phone' => '5522222222']);
+
+        $this->travelTo('2026-10-12 05:30');
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->assertSame([], $this->whatsApp->sent);
+
+        $this->travelTo('2026-10-12 06:00');
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->assertCount(4, $this->whatsApp->sent);
+
+        Vote::query()->create(['company_id' => $voter->company_id, 'flight_date' => '2026-10-12', 'color' => 'green']);
+
+        $this->travelTo('2026-10-12 06:31');
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->artisan('fegat:whatsapp-recordatorios');
+
+        $this->assertCount(6, $this->whatsApp->sent);
+        $this->assertSame(['+525511111111', '+525511111111'], array_column(array_slice($this->whatsApp->sent, 4), 'to'));
+        $this->assertDatabaseHas(WhatsappReminder::class, ['user_id' => $pending->id, 'kind' => 'reminder_2']);
+    }
+
+    public function test_if_the_first_send_was_missed_only_the_second_goes_out()
+    {
+        VotingSetting::current()->update(['reminder_first_at' => '05:30', 'reminder_second_at' => '06:00']);
+        User::factory()->forCompany()->create(['phone' => '5511111111']);
+
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->artisan('fegat:whatsapp-recordatorios');
+
+        $this->assertCount(2, $this->whatsApp->sent);
+        $this->assertDatabaseCount(WhatsappReminder::class, 1);
+        $this->assertDatabaseHas(WhatsappReminder::class, ['kind' => 'reminder_2']);
+    }
+
+    public function test_the_send_times_must_fall_inside_the_voting_window()
+    {
+        $admin = User::factory()->superAdmin()->create();
+        $base = ['min_votes' => 2, 'opens_at' => '05:00', 'closes_at' => '07:00', 'whatsapp_enabled' => '1'];
+
+        $this->actingAs($admin)
+            ->put(route('admin.voting.update'), [...$base, 'reminder_first_at' => '04:00', 'reminder_second_at' => '07:30'])
+            ->assertSessionHasErrors(['reminder_first_at', 'reminder_second_at']);
+
+        $this->actingAs($admin)
+            ->put(route('admin.voting.update'), [...$base, 'reminder_first_at' => '06:30', 'reminder_second_at' => '06:00'])
+            ->assertSessionHasErrors(['reminder_second_at']);
+
+        $this->actingAs($admin)
+            ->put(route('admin.voting.update'), [...$base, 'reminder_first_at' => '06:00', 'reminder_second_at' => '06:30'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(
+            ['reminder_first_at' => '06:00', 'reminder_second_at' => '06:30'],
+            VotingSetting::current()->only(['reminder_first_at', 'reminder_second_at']),
+        );
+
+        // Vacío deja un solo envío.
+        $this->actingAs($admin)
+            ->put(route('admin.voting.update'), [...$base, 'reminder_first_at' => '06:00', 'reminder_second_at' => ''])
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull(VotingSetting::current()->reminder_second_at);
+    }
+
+    public function test_the_window_crossing_midnight_is_respected()
+    {
+        VotingSetting::current()->update(['opens_at' => '22:00', 'closes_at' => '07:00', 'reminder_first_at' => '23:30', 'reminder_second_at' => '05:30']);
+        User::factory()->forCompany()->create(['phone' => '5511111111']);
+
+        $this->travelTo('2026-10-11 23:00');
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->assertSame([], $this->whatsApp->sent);
+
+        $this->travelTo('2026-10-11 23:45');
+        $this->artisan('fegat:whatsapp-recordatorios');
+        $this->travelTo('2026-10-12 05:31');
+        $this->artisan('fegat:whatsapp-recordatorios');
+
+        $this->assertCount(4, $this->whatsApp->sent);
+        $this->assertSame(2, WhatsappReminder::query()->where('flight_date', '2026-10-12')->count());
+    }
+
     public function test_a_failed_send_is_recorded_and_not_retried()
     {
         User::factory()->forCompany()->create(['phone' => '5512345678']);
