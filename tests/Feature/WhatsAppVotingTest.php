@@ -321,9 +321,7 @@ class WhatsAppVotingTest extends TestCase
         $this->assertSame('Se cancela (rojo)', $message['variables']['2']);
         $this->assertSame('2 de 3 empresas', $message['variables']['3']);
         $this->assertSame('Verde 1 · Amarillo 0 · Rojo 1', $message['variables']['4']);
-        $this->assertStringStartsWith('🟢 Verde: Aerostat (Juan) | 🔴 Rojo: Volare (', $message['variables']['5']);
-        $this->assertStringEndsWith(' | ⚪ Sin voto: Sky Balloons', $message['variables']['5']);
-        $this->assertStringNotContainsString('Amarillo', $message['variables']['5']);
+        $this->assertSame('🟢 Verde: Aerostat | 🔴 Rojo: Volare | ⚪ Sin voto: Sky Balloons', $message['variables']['5']);
         $this->assertDatabaseHas(WhatsappReminder::class, ['user_id' => $admin->id, 'kind' => 'summary', 'flight_date' => '2026-10-12']);
     }
 

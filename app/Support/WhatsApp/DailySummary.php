@@ -12,7 +12,7 @@ use RuntimeException;
 
 /**
  * Resumen de una jornada para los super admin: resultado, participación y
- * qué votó cada empresa (y quién).
+ * qué votó cada empresa.
  *
  * WhatsApp no acepta saltos de línea dentro de las variables de una plantilla,
  * así que el detalle va en una sola línea, agrupado por color y separado por «|».
@@ -36,7 +36,7 @@ class DailySummary
         $companies = Company::query()
             ->where('is_active', true)
             ->orderBy('name')
-            ->with(['votes' => fn ($query) => $query->where('flight_date', $flightDate)->with('user:id,name')])
+            ->with(['votes' => fn ($query) => $query->where('flight_date', $flightDate)])
             ->get();
 
         $voted = ['green' => [], 'yellow' => [], 'red' => []];
@@ -51,7 +51,7 @@ class DailySummary
                 continue;
             }
 
-            $voted[$vote->color->value][] = $company->name.($vote->user ? " ({$vote->user->name})" : '');
+            $voted[$vote->color->value][] = $company->name;
         }
 
         $counts = array_map(count(...), $voted);

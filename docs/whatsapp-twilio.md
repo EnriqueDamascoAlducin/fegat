@@ -85,7 +85,7 @@ Consulta el historial completo en el panel.
 | {{2}} | Resultado | Volamos (verde) |
 | {{3}} | Participación | 6 de 8 empresas |
 | {{4}} | Conteo por color | Verde 4 · Amarillo 1 · Rojo 1 |
-| {{5}} | Voto de cada empresa, por color, y quién falta | 🟢 Verde: Aerostat (Juan Pérez), Globos MX (Luis Ruiz) \| 🔴 Rojo: Volare (Ana López) \| ⚪ Sin voto: Sky Balloons |
+| {{5}} | Voto de cada empresa, por color, y quién falta | 🟢 Verde: Aerostat, Globos MX \| 🔴 Rojo: Volare \| ⚪ Sin voto: Sky Balloons |
 
 Su Content SID va en `TWILIO_TEMPLATE_DAILY_SUMMARY`.
 
