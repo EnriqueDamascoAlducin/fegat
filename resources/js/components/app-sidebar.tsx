@@ -9,6 +9,7 @@ import {
     History,
     KeyRound,
     LayoutGrid,
+    ListChecks,
     Newspaper,
     PanelsTopLeft,
     Users,
@@ -26,7 +27,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, indicators } from '@/routes';
-import { history } from '@/routes/admin';
+import { history, participation } from '@/routes/admin';
 import { index as apiClients } from '@/routes/admin/api-clients';
 import { index as companies } from '@/routes/admin/companies';
 import { index as pages } from '@/routes/admin/pages';
@@ -80,6 +81,11 @@ const adminNavItems: NavItem[] = [
         title: 'Historial',
         href: history(),
         icon: History,
+    },
+    {
+        title: 'Cumplimiento',
+        href: participation(),
+        icon: ListChecks,
     },
     {
         title: 'Votación',

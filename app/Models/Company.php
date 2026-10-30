@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property string|null $logo_path Ruta del logo dentro del disco público.
  * @property-read string|null $logo_url
+ * @property-read int $voters_count Solo con withCount.
  */
 #[Fillable(['name', 'website_url', 'logo_path', 'is_active'])]
 class Company extends Model

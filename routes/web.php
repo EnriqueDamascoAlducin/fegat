@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SiteLayoutController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitorReportController;
 use App\Http\Controllers\Admin\VoteHistoryController;
+use App\Http\Controllers\Admin\VoteParticipationController;
 use App\Http\Controllers\Admin\VotingSettingController;
 use App\Http\Controllers\Admin\WhatsAppTestController;
 use App\Http\Controllers\BlogController;
@@ -82,6 +83,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('historial', VoteHistoryController::class)->name('history');
+        Route::get('cumplimiento', VoteParticipationController::class)->name('participation');
 
         Route::get('llaves-api', [ApiClientController::class, 'index'])->name('api-clients.index');
         Route::post('llaves-api', [ApiClientController::class, 'store'])->name('api-clients.store');
