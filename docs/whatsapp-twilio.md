@@ -64,17 +64,24 @@ aprobación como **Utility**.
 
 ## Paso 2b. Crear la plantilla del resumen diario (super admin)
 
-- **Nombre:** `fegat_resumen_diario`
+- **Nombre:** `fegat_resumen_diario_v2` (una plantilla aprobada no se edita; se crea otra)
 - **Idioma:** Spanish (MEX) · **Tipo:** Text · **Categoría:** Utility
 - **Cuerpo:**
 
 ```
-Resumen del semáforo de FEGAT del {{1}}.
+*Resumen del semáforo de FEGAT*
+Jornada del {{1}}
 
-Resultado: {{2}}
-Votaron {{3}}: {{4}}.
+*Resultado:* {{2}}
+*Votaron:* {{3}}
 
-Detalle: {{5}}
+🟢 *Verde:* {{4}}
+
+🟡 *Amarillo:* {{5}}
+
+🔴 *Rojo:* {{6}}
+
+⚪ *Sin voto:* {{7}}
 
 Consulta el historial completo en el panel.
 ```
@@ -84,8 +91,10 @@ Consulta el historial completo en el panel.
 | {{1}} | Fecha de la jornada | martes 21 de octubre |
 | {{2}} | Resultado | Volamos (verde) |
 | {{3}} | Participación | 6 de 8 empresas |
-| {{4}} | Conteo por color | Verde 4 · Amarillo 1 · Rojo 1 |
-| {{5}} | Voto de cada empresa y quién falta | Aerostat: Verde (Juan Pérez) · Volare: Rojo (Ana López) · Sin voto: Sky Balloons |
+| {{4}} | Empresas que votaron verde y quién | Aerostat (Juan Pérez), Globos MX (Luis Ruiz) |
+| {{5}} | Empresas que votaron amarillo y quién | Ninguna |
+| {{6}} | Empresas que votaron rojo y quién | Volare (Ana López) |
+| {{7}} | Empresas sin voto | Sky Balloons |
 
 Su Content SID va en `TWILIO_TEMPLATE_DAILY_SUMMARY`.
 

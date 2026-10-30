@@ -15,10 +15,13 @@ use RuntimeException;
  * qué votó cada empresa (y quién).
  *
  * WhatsApp no acepta saltos de línea dentro de las variables de una plantilla,
- * así que el detalle va en una sola línea separada por «·».
+ * así que cada color tiene su propia variable y su renglón fijo en la plantilla.
  */
 class DailySummary
 {
+    /** Tope de cada lista; el mensaje completo no puede pasar de 1024 caracteres. */
+    private const LIST_LIMIT = 400;
+
     public function __construct(private WhatsAppSender $whatsApp, private Semaphore $semaphore) {}
 
     public static function isReady(): bool
@@ -29,7 +32,7 @@ class DailySummary
     /**
      * Variables de la plantilla para una jornada (Y-m-d).
      *
-     * @return array{1: string, 2: string, 3: string, 4: string, 5: string}
+     * @return array{1: string, 2: string, 3: string, 4: string, 5: string, 6: string, 7: string}
      */
     public function variables(string $flightDate): array
     {
@@ -39,8 +42,7 @@ class DailySummary
             ->with(['votes' => fn ($query) => $query->where('flight_date', $flightDate)->with('user:id,name')])
             ->get();
 
-        $counts = ['green' => 0, 'yellow' => 0, 'red' => 0];
-        $voted = [];
+        $voted = ['green' => [], 'yellow' => [], 'red' => []];
         $missing = [];
 
         foreach ($companies as $company) {
@@ -52,10 +54,10 @@ class DailySummary
                 continue;
             }
 
-            $counts[$vote->color->value]++;
-            $voted[] = "{$company->name}: {$vote->color->label()}".($vote->user ? " ({$vote->user->name})" : '');
+            $voted[$vote->color->value][] = $company->name.($vote->user ? " ({$vote->user->name})" : '');
         }
 
+        $counts = array_map(count(...), $voted);
         $total = array_sum($counts);
         $decision = FinalDecision::query()->where('flight_date', $flightDate)->first();
         $status = $decision?->color->value ?? $this->semaphore->decide($counts, VotingSetting::current()->min_votes);
@@ -67,19 +69,19 @@ class DailySummary
             default => 'Sin resultado: no se alcanzó el mínimo de votos',
         };
 
-        $detail = $voted ? implode(' · ', $voted) : 'Ninguna empresa votó';
-
-        if ($missing) {
-            $detail .= ' · Sin voto: '.implode(', ', $missing);
-        }
+        // WhatsApp rechaza las variables vacías.
+        $list = fn (array $names): string => $names === []
+            ? 'Ninguna'
+            : mb_strimwidth(implode(', ', $names), 0, self::LIST_LIMIT, '…');
 
         return [
             '1' => CarbonImmutable::parse($flightDate)->translatedFormat('l j \d\e F'),
             '2' => $result.($decision ? ' · decisión oficial' : ''),
             '3' => "{$total} de {$companies->count()} empresas",
-            '4' => "Verde {$counts['green']} · Amarillo {$counts['yellow']} · Rojo {$counts['red']}",
-            // Límite de Meta para una variable.
-            '5' => mb_strimwidth($detail, 0, 1000, '…'),
+            '4' => $list($voted['green']),
+            '5' => $list($voted['yellow']),
+            '6' => $list($voted['red']),
+            '7' => $list($missing),
         ];
     }
 
