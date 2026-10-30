@@ -15,13 +15,10 @@ use RuntimeException;
  * qué votó cada empresa (y quién).
  *
  * WhatsApp no acepta saltos de línea dentro de las variables de una plantilla,
- * así que cada color tiene su propia variable y su renglón fijo en la plantilla.
+ * así que el detalle va en una sola línea, agrupado por color y separado por «|».
  */
 class DailySummary
 {
-    /** Tope de cada lista; el mensaje completo no puede pasar de 1024 caracteres. */
-    private const LIST_LIMIT = 400;
-
     public function __construct(private WhatsAppSender $whatsApp, private Semaphore $semaphore) {}
 
     public static function isReady(): bool
@@ -32,7 +29,7 @@ class DailySummary
     /**
      * Variables de la plantilla para una jornada (Y-m-d).
      *
-     * @return array{1: string, 2: string, 3: string, 4: string, 5: string, 6: string, 7: string}
+     * @return array{1: string, 2: string, 3: string, 4: string, 5: string}
      */
     public function variables(string $flightDate): array
     {
@@ -69,19 +66,23 @@ class DailySummary
             default => 'Sin resultado: no se alcanzó el mínimo de votos',
         };
 
-        // WhatsApp rechaza las variables vacías.
-        $list = fn (array $names): string => $names === []
-            ? 'Ninguna'
-            : mb_strimwidth(implode(', ', $names), 0, self::LIST_LIMIT, '…');
+        $detail = collect([
+            '🟢 Verde' => $voted['green'],
+            '🟡 Amarillo' => $voted['yellow'],
+            '🔴 Rojo' => $voted['red'],
+            '⚪ Sin voto' => $missing,
+        ])
+            ->filter()
+            ->map(fn (array $names, string $label) => "{$label}: ".implode(', ', $names))
+            ->implode(' | ');
 
         return [
             '1' => CarbonImmutable::parse($flightDate)->translatedFormat('l j \d\e F'),
             '2' => $result.($decision ? ' · decisión oficial' : ''),
             '3' => "{$total} de {$companies->count()} empresas",
-            '4' => $list($voted['green']),
-            '5' => $list($voted['yellow']),
-            '6' => $list($voted['red']),
-            '7' => $list($missing),
+            '4' => "Verde {$counts['green']} · Amarillo {$counts['yellow']} · Rojo {$counts['red']}",
+            // Límite de Meta para una variable; WhatsApp rechaza las vacías.
+            '5' => mb_strimwidth($detail ?: 'Ninguna empresa votó', 0, 1000, '…'),
         ];
     }
 
