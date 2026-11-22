@@ -35,8 +35,8 @@ return [
         'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
         'ssl_verify' => env('TWILIO_SSL_VERIFY', true),
         // Plantillas aprobadas (Content SID «HX…»).
-        'template_vote_reminder' => env('TWILIO_TEMPLATE_VOTE_REMINDER'),
-        'template_vote_poll' => env('TWILIO_TEMPLATE_VOTE_POLL'),
+        // Recordatorio + encuesta con botones en un solo mensaje.
+        'template_vote' => env('TWILIO_TEMPLATE_VOTE'),
         'template_daily_summary' => env('TWILIO_TEMPLATE_DAILY_SUMMARY'),
         // URL pública exacta configurada en Twilio, si el servidor está detrás de un proxy.
         'webhook_url' => env('TWILIO_WEBHOOK_URL'),

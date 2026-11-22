@@ -1,33 +1,28 @@
 # Votación por WhatsApp (Twilio) — paso a paso
 
 Al abrir la votación, cada administrador de empresa que tenga WhatsApp registrado
-y cuya empresa aún no vote recibe dos mensajes:
-
-1. **Recordatorio** con el enlace al panel.
-2. **Encuesta** con tres botones (Verde, Amarillo, Rojo). Al tocar uno, Twilio
-   avisa al servidor, se registra el voto de su empresa y se le confirma en el chat.
+y cuya empresa aún no vote recibe **un solo mensaje** con el recordatorio, el
+enlace al panel y tres botones (Verde, Amarillo, Rojo). Al tocar uno, Twilio
+avisa al servidor, se registra el voto de su empresa y se le confirma en el chat.
 
 También cuenta si escribe el color a mano («verde», «rojo», «1», «2», «3»…).
 
+> Antes se mandaban dos plantillas (recordatorio + encuesta); se unieron en una
+> para que Twilio cobre un mensaje por envío en lugar de dos.
+
 ---
 
-## Paso 1. Crear la plantilla de recordatorio en Twilio
+## Paso 1. Crear la plantilla de votación en Twilio
 
 Twilio Console → Messaging → **Content Template Builder** → *Create new*.
 
-- **Nombre:** `fegat_recordatorio_voto`
-- **Idioma:** Spanish (MEX) · **Tipo:** Text
+- **Nombre:** `fegat_votacion`
+- **Idioma:** Spanish (MEX) · **Tipo:** Quick reply · **Categoría:** Utility
 - **Cuerpo** (Meta no acepta que empiece o termine con una variable):
 
 ```
-Hola {{1}}, ya abrió la votación del semáforo de FEGAT para la jornada del {{2}}.
-
-Registra el voto de {{3}} antes de las {{4}} h en {{5}} o responde la encuesta que te enviamos a continuación.
-
-Gracias.
+Hola {{1}}, ya abrió la votación del semáforo de FEGAT para la jornada del {{2}}. ¿Cuál es el voto de {{3}}? Elige una opción: 🟢 Verde: volamos. 🟡 Amarillo: en espera. 🔴 Rojo: se cancela. Registra el voto antes de las {{4}} aquí o en {{5}}. Gracias.
 ```
-
-Valores de ejemplo para la revisión de Meta:
 
 | Variable | Qué envía el sistema | Ejemplo |
 |---|---|---|
@@ -37,20 +32,6 @@ Valores de ejemplo para la revisión de Meta:
 | {{4}} | Hora de cierre | 07:00 |
 | {{5}} | Enlace al panel | https://fegat.myflight.com.mx/dashboard |
 
-Guarda y envía a aprobación de WhatsApp con categoría **Utility**.
-
-## Paso 2. Crear la plantilla de encuesta
-
-- **Nombre:** `fegat_encuesta_voto`
-- **Idioma:** Spanish (MEX) · **Tipo:** Quick reply
-- **Cuerpo:**
-
-```
-¿Cuál es el voto de {{1}} para la jornada del {{2}}?
-
-Verde: volamos. Amarillo: en espera. Rojo: se cancela.
-```
-
 - **Botones.** El *ID* debe ser exactamente este; es lo que identifica el voto:
 
 | Texto del botón | ID |
@@ -59,8 +40,7 @@ Verde: volamos. Amarillo: en espera. Rojo: se cancela.
 | Amarillo | `vote_yellow` |
 | Rojo | `vote_red` |
 
-Ejemplos para Meta: {{1}} = Aerostat, {{2}} = lunes 19 de octubre. Envía a
-aprobación como **Utility**.
+Su Content SID va en `TWILIO_TEMPLATE_VOTE`.
 
 ## Paso 2b. Crear la plantilla del resumen diario (super admin)
 
@@ -95,14 +75,13 @@ Su Content SID va en `TWILIO_TEMPLATE_DAILY_SUMMARY`.
 ## Paso 3. Variables en el `.env` del servidor
 
 Las mismas credenciales de la cuenta de Twilio que usa SAV, más los Content SID
-(`HX…`) de las dos plantillas:
+(`HX…`) de las plantillas:
 
 ```dotenv
 TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
 TWILIO_WHATSAPP_FROM=whatsapp:+52...
-TWILIO_TEMPLATE_VOTE_REMINDER=HX...
-TWILIO_TEMPLATE_VOTE_POLL=HX...
+TWILIO_TEMPLATE_VOTE=HX...
 TWILIO_TEMPLATE_DAILY_SUMMARY=HX...
 TWILIO_WEBHOOK_URL=
 ```
@@ -151,7 +130,7 @@ Diez dígitos se toman como número de México (`55 1234 5678` → `+52551234567
 
 1. Panel → **Votación** → **Probar mensajes de WhatsApp**.
 2. Escribe tu número y, si quieres, el nombre de una empresa → **Enviar prueba**.
-3. Deben llegarte el recordatorio y la encuesta. Si Twilio rechaza el envío, el
+3. Debe llegarte el mensaje de votación con sus tres botones. Si Twilio rechaza el envío, el
    error aparece debajo del campo.
 4. Para probar que el botón registre el voto, el número debe pertenecer a un
    **administrador de empresa activa** (por ejemplo, crea un usuario de prueba con

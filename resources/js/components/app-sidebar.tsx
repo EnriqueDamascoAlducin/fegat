@@ -36,85 +36,105 @@ import { edit as site } from '@/routes/admin/site';
 import { index as liveVisitors, report as visitorReport } from '@/routes/admin/visitors';
 import { index as users } from '@/routes/admin/users';
 import { edit as voting } from '@/routes/admin/voting';
-import type { NavItem } from '@/types';
+import type { NavGroup } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const mainNavGroups: NavGroup[] = [
     {
-        title: 'Semáforo',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Indicadores',
-        href: indicators(),
-        icon: ChartColumn,
+        title: 'Plataforma',
+        items: [
+            {
+                title: 'Semáforo',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Indicadores',
+                href: indicators(),
+                icon: ChartColumn,
+            },
+        ],
     },
 ];
 
-const adminNavItems: NavItem[] = [
-    {
-        title: 'Páginas',
-        href: pages(),
-        icon: FileText,
-    },
-    {
-        title: 'Sitio público',
-        href: site(),
-        icon: PanelsTopLeft,
-    },
-    {
-        title: 'Blog',
-        href: posts(),
-        icon: Newspaper,
-    },
-    {
-        title: 'Visitantes en vivo',
-        href: liveVisitors(),
-        icon: Activity,
-    },
-    {
-        title: 'Reporte de visitantes',
-        href: visitorReport(),
-        icon: ChartLine,
-    },
-    {
-        title: 'Historial',
-        href: history(),
-        icon: History,
-    },
-    {
-        title: 'Cumplimiento',
-        href: participation(),
-        icon: ListChecks,
-    },
+const adminNavGroups: NavGroup[] = [
     {
         title: 'Votación',
-        href: voting(),
-        icon: Clock,
+        items: [
+            {
+                title: 'Configuración',
+                href: voting(),
+                icon: Clock,
+            },
+            {
+                title: 'Cumplimiento',
+                href: participation(),
+                icon: ListChecks,
+            },
+            {
+                title: 'Historial',
+                href: history(),
+                icon: History,
+            },
+        ],
     },
     {
-        title: 'Empresas',
-        href: companies(),
-        icon: Building2,
+        title: 'Sitio web',
+        items: [
+            {
+                title: 'Sitio público',
+                href: site(),
+                icon: PanelsTopLeft,
+            },
+            {
+                title: 'Páginas',
+                href: pages(),
+                icon: FileText,
+            },
+            {
+                title: 'Blog',
+                href: posts(),
+                icon: Newspaper,
+            },
+            {
+                title: 'Visitantes en vivo',
+                href: liveVisitors(),
+                icon: Activity,
+            },
+            {
+                title: 'Reporte de visitantes',
+                href: visitorReport(),
+                icon: ChartLine,
+            },
+        ],
     },
     {
-        title: 'Usuarios',
-        href: users(),
-        icon: Users,
-    },
-    {
-        title: 'Llaves de API',
-        href: apiClients(),
-        icon: KeyRound,
+        title: 'Administración',
+        items: [
+            {
+                title: 'Empresas',
+                href: companies(),
+                icon: Building2,
+            },
+            {
+                title: 'Usuarios',
+                href: users(),
+                icon: Users,
+            },
+            {
+                title: 'Llaves de API',
+                href: apiClients(),
+                icon: KeyRound,
+            },
+        ],
     },
 ];
 
 export function AppSidebar() {
     const { auth } = usePage().props;
-    const items =
+    const groups =
         auth.user.role === 'super_admin'
-            ? [...mainNavItems, ...adminNavItems]
-            : mainNavItems;
+            ? [...mainNavGroups, ...adminNavGroups]
+            : mainNavGroups;
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -131,7 +151,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={items} />
+                <NavMain groups={groups} />
             </SidebarContent>
 
             <SidebarFooter>

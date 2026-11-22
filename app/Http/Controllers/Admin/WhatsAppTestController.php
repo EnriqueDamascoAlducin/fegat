@@ -19,7 +19,7 @@ use Throwable;
 class WhatsAppTestController extends Controller
 {
     /**
-     * Manda el recordatorio y la encuesta reales a un número, para probar
+     * Manda el mensaje de votación real (recordatorio con botones) a un número, para probar
      * plantillas y webhook sin esperar a que abra la votación. No registra
      * recordatorios ni depende del interruptor de «Votar por WhatsApp».
      */

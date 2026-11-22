@@ -7,21 +7,22 @@ use Carbon\CarbonImmutable;
 use RuntimeException;
 
 /**
- * Recordatorio y encuesta de votación. Lo usan el envío automático y la prueba
- * del super admin, para que la prueba llegue exactamente igual que el real.
+ * Mensaje de votación: recordatorio y encuesta en una sola plantilla con los
+ * botones Verde, Amarillo y Rojo (un solo mensaje cobrado por Twilio). Lo usan
+ * el envío automático y la prueba del super admin, para que la prueba llegue
+ * exactamente igual que el real.
  */
 class VotingMessages
 {
     public function __construct(private WhatsAppSender $whatsApp) {}
 
     /**
-     * Twilio con sus credenciales y las dos plantillas.
+     * Twilio con sus credenciales y la plantilla de votación.
      */
     public static function isReady(): bool
     {
         return TwilioWhatsApp::isConfigured()
-            && filled(config('services.twilio.template_vote_reminder'))
-            && filled(config('services.twilio.template_vote_poll'));
+            && filled(config('services.twilio.template_vote'));
     }
 
     /**
@@ -32,22 +33,17 @@ class VotingMessages
     public function send(string $toE164, string $name, string $company, array $session): void
     {
         if (! self::isReady()) {
-            throw new RuntimeException('Falta configurar Twilio o sus plantillas en el .env del servidor.');
+            throw new RuntimeException('Falta configurar Twilio o su plantilla de votación (TWILIO_TEMPLATE_VOTE) en el .env del servidor.');
         }
 
         $date = CarbonImmutable::parse($session['flight_date'])->translatedFormat('l j \d\e F');
 
-        $this->whatsApp->sendTemplate($toE164, config('services.twilio.template_vote_reminder'), [
+        $this->whatsApp->sendTemplate($toE164, config('services.twilio.template_vote'), [
             '1' => $name,
             '2' => $date,
             '3' => $company,
             '4' => $session['closes_at'],
             '5' => route('dashboard'),
-        ]);
-
-        $this->whatsApp->sendTemplate($toE164, config('services.twilio.template_vote_poll'), [
-            '1' => $company,
-            '2' => $date,
         ]);
     }
 }

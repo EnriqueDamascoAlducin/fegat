@@ -77,13 +77,21 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
-     * Usuario dueño del número que escribió por WhatsApp («whatsapp:+52…»).
+     * Usuario dueño del número que escribió por WhatsApp («whatsapp:+52…»). Si
+     * varios roles comparten el número, gana el administrador de empresa: por
+     * WhatsApp solo se vota.
      */
     public static function findByWhatsApp(string $from): ?self
     {
         $phone = PhoneNumber::normalize($from);
 
-        return $phone ? static::query()->where('phone', $phone)->first() : null;
+        if (! $phone) {
+            return null;
+        }
+
+        $users = static::query()->where('phone', $phone)->get();
+
+        return $users->first(fn (self $user) => $user->role === UserRole::CompanyAdmin) ?? $users->first();
     }
 
     /**

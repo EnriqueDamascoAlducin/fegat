@@ -90,7 +90,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user)],
             'username' => $this->usernameRules($user?->id),
-            'phone' => $this->phoneRules($user?->id),
+            'phone' => $this->phoneRules((string) $request->input('role'), $user?->id),
             'role' => ['required', Rule::enum(UserRole::class)],
             'company_id' => [
                 Rule::requiredIf($request->input('role') === UserRole::CompanyAdmin->value),

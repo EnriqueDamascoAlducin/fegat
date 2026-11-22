@@ -28,8 +28,7 @@ class WhatsAppVotingTest extends TestCase
             'services.twilio.sid' => 'AC_prueba',
             'services.twilio.token' => 'token-de-prueba',
             'services.twilio.whatsapp_from' => 'whatsapp:+14155238886',
-            'services.twilio.template_vote_reminder' => 'HX_recordatorio',
-            'services.twilio.template_vote_poll' => 'HX_encuesta',
+            'services.twilio.template_vote' => 'HX_votacion',
             'services.twilio.template_daily_summary' => 'HX_resumen',
             'services.twilio.webhook_url' => null,
         ]);
@@ -65,12 +64,12 @@ class WhatsAppVotingTest extends TestCase
         $this->artisan('fegat:whatsapp-recordatorios')->assertSuccessful();
         $this->artisan('fegat:whatsapp-recordatorios')->assertSuccessful();
 
-        $this->assertCount(2, $this->whatsApp->sent);
+        $this->assertCount(1, $this->whatsApp->sent);
         $this->assertSame('+525512345678', $this->whatsApp->sent[0]['to']);
-        $this->assertSame('HX_recordatorio', $this->whatsApp->sent[0]['template']);
+        $this->assertSame('HX_votacion', $this->whatsApp->sent[0]['template']);
+        $this->assertSame($user->name, $this->whatsApp->sent[0]['variables']['1']);
+        $this->assertSame($user->company->name, $this->whatsApp->sent[0]['variables']['3']);
         $this->assertSame(route('dashboard'), $this->whatsApp->sent[0]['variables']['5']);
-        $this->assertSame($user->company->name, $this->whatsApp->sent[1]['variables']['1']);
-        $this->assertSame('HX_encuesta', $this->whatsApp->sent[1]['template']);
         $this->assertDatabaseHas(WhatsappReminder::class, ['user_id' => $user->id, 'status' => 'sent']);
     }
 
@@ -117,7 +116,7 @@ class WhatsAppVotingTest extends TestCase
         $this->travelTo('2026-10-12 06:00');
         $this->artisan('fegat:whatsapp-recordatorios');
         $this->artisan('fegat:whatsapp-recordatorios');
-        $this->assertCount(4, $this->whatsApp->sent);
+        $this->assertCount(2, $this->whatsApp->sent);
 
         Vote::query()->create(['company_id' => $voter->company_id, 'flight_date' => '2026-10-12', 'color' => 'green']);
 
@@ -125,8 +124,8 @@ class WhatsAppVotingTest extends TestCase
         $this->artisan('fegat:whatsapp-recordatorios');
         $this->artisan('fegat:whatsapp-recordatorios');
 
-        $this->assertCount(6, $this->whatsApp->sent);
-        $this->assertSame(['+525511111111', '+525511111111'], array_column(array_slice($this->whatsApp->sent, 4), 'to'));
+        $this->assertCount(3, $this->whatsApp->sent);
+        $this->assertSame(['+525511111111'], array_column(array_slice($this->whatsApp->sent, 2), 'to'));
         $this->assertDatabaseHas(WhatsappReminder::class, ['user_id' => $pending->id, 'kind' => 'reminder_2']);
     }
 
@@ -138,7 +137,7 @@ class WhatsAppVotingTest extends TestCase
         $this->artisan('fegat:whatsapp-recordatorios');
         $this->artisan('fegat:whatsapp-recordatorios');
 
-        $this->assertCount(2, $this->whatsApp->sent);
+        $this->assertCount(1, $this->whatsApp->sent);
         $this->assertDatabaseCount(WhatsappReminder::class, 1);
         $this->assertDatabaseHas(WhatsappReminder::class, ['kind' => 'reminder_2']);
     }
@@ -187,7 +186,7 @@ class WhatsAppVotingTest extends TestCase
         $this->travelTo('2026-10-12 05:31');
         $this->artisan('fegat:whatsapp-recordatorios');
 
-        $this->assertCount(4, $this->whatsApp->sent);
+        $this->assertCount(2, $this->whatsApp->sent);
         $this->assertSame(2, WhatsappReminder::query()->where('flight_date', '2026-10-12')->count());
     }
 
@@ -258,10 +257,10 @@ class WhatsAppVotingTest extends TestCase
             ->assertRedirect(route('admin.voting.edit'))
             ->assertSessionHasNoErrors();
 
-        $this->assertCount(2, $this->whatsApp->sent);
+        $this->assertCount(1, $this->whatsApp->sent);
         $this->assertSame('+525512345678', $this->whatsApp->sent[0]['to']);
         $this->assertSame('Enrique', $this->whatsApp->sent[0]['variables']['1']);
-        $this->assertSame('Aerostat', $this->whatsApp->sent[1]['variables']['1']);
+        $this->assertSame('Aerostat', $this->whatsApp->sent[0]['variables']['3']);
         $this->assertDatabaseCount(WhatsappReminder::class, 0);
     }
 
@@ -274,7 +273,7 @@ class WhatsAppVotingTest extends TestCase
             ->post(route('admin.voting.whatsapp-test'), ['test_phone' => '5512345678'])
             ->assertSessionHasErrors(['test_phone' => 'No se pudo enviar: Twilio no disponible']);
 
-        config(['services.twilio.template_vote_poll' => null]);
+        config(['services.twilio.template_vote' => null]);
         $this->actingAs($admin)
             ->post(route('admin.voting.whatsapp-test'), ['test_phone' => '5512345678'])
             ->assertSessionHasErrors('test_phone');
@@ -335,7 +334,7 @@ class WhatsAppVotingTest extends TestCase
         $this->artisan('fegat:whatsapp-recordatorios');
         $this->artisan('fegat:whatsapp-resumen');
 
-        $this->assertSame(['HX_recordatorio', 'HX_encuesta', 'HX_resumen'], array_column($this->whatsApp->sent, 'template'));
+        $this->assertSame(['HX_votacion', 'HX_resumen'], array_column($this->whatsApp->sent, 'template'));
     }
 
     public function test_the_summary_is_not_sent_when_disabled()
@@ -360,10 +359,10 @@ class WhatsAppVotingTest extends TestCase
         $this->assertSame('Sin resultado: no se alcanzó el mínimo de votos', $this->whatsApp->sent[0]['variables']['2']);
     }
 
-    public function test_phones_are_normalized_and_cannot_be_repeated()
+    public function test_phones_are_normalized_and_cannot_be_repeated_within_a_role()
     {
         $admin = User::factory()->superAdmin()->create();
-        User::factory()->forCompany()->create(['phone' => '5512345678']);
+        User::factory()->decider()->create(['phone' => '5512345678']);
         $user = User::factory()->decider()->create();
 
         $this->actingAs($admin)->put(route('admin.users.update', $user), [
@@ -381,5 +380,46 @@ class WhatsAppVotingTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $this->assertSame('+525587654321', $user->fresh()->phone);
+    }
+
+    public function test_a_phone_can_be_shared_between_different_roles()
+    {
+        $admin = User::factory()->superAdmin()->create();
+        User::factory()->forCompany()->create(['phone' => '5512345678']);
+
+        $this->actingAs($admin)->put(route('admin.users.update', $admin), [
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'role' => 'super_admin',
+            'phone' => '55 1234 5678',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('+525512345678', $admin->fresh()->phone);
+    }
+
+    public function test_changing_role_checks_the_phone_against_the_new_role()
+    {
+        $admin = User::factory()->superAdmin()->create();
+        User::factory()->decider()->create(['phone' => '5512345678']);
+        $user = User::factory()->forCompany()->create(['phone' => '5512345678']);
+
+        $this->actingAs($admin)->put(route('admin.users.update', $user), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => 'decider',
+            'phone' => '5512345678',
+        ])->assertSessionHasErrors('phone');
+    }
+
+    public function test_a_shared_phone_votes_as_the_company_admin()
+    {
+        User::factory()->superAdmin()->create(['phone' => '5512345678']);
+        $voter = User::factory()->forCompany()->create(['phone' => '5512345678']);
+
+        $this->fromTwilio(['From' => 'whatsapp:+525512345678', 'Body' => 'Verde'])
+            ->assertOk()
+            ->assertSee('Voto registrado', false);
+
+        $this->assertDatabaseHas(Vote::class, ['company_id' => $voter->company_id, 'flight_date' => '2026-10-12', 'color' => 'green']);
     }
 }

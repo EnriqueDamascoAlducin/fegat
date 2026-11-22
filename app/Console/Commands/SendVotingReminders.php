@@ -16,8 +16,8 @@ use Throwable;
 /**
  * Corre cada minuto. Mientras la votación está abierta, a la hora del primer
  * recordatorio (y, si está configurada, a la del segundo) manda a cada
- * administrador de empresa que aún no vota el enlace y la encuesta para votar
- * desde WhatsApp. Cada envío sale una sola vez por jornada, aunque el servidor
+ * administrador de empresa que aún no vota un solo mensaje con el enlace y los
+ * botones para votar desde WhatsApp. Cada envío sale una sola vez por jornada, aunque el servidor
  * haya estado apagado a esa hora; si se perdió el primero y ya toca el segundo,
  * solo se manda el segundo.
  */
@@ -31,7 +31,7 @@ class SendVotingReminders extends Command
     /**
      * @var string
      */
-    protected $description = 'Envía por WhatsApp el recordatorio y la encuesta de votación de la jornada';
+    protected $description = 'Envía por WhatsApp el recordatorio con la encuesta de votación de la jornada';
 
     public function handle(Semaphore $semaphore, VotingMessages $messages): int
     {

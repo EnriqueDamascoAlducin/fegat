@@ -148,9 +148,9 @@ export default function VotingSettings({
                                             A cada hora indicada, cada
                                             administrador de empresa con
                                             WhatsApp registrado recibe un
-                                            recordatorio con el enlace y una
-                                            encuesta para votar respondiendo
-                                            Verde, Amarillo o Rojo. Solo se
+                                            solo mensaje con el enlace y los
+                                            botones para votar Verde, Amarillo
+                                            o Rojo. Solo se
                                             envía a empresas que aún no votan,
                                             así que el segundo envío llega solo
                                             a quien sigue sin votar.
@@ -272,7 +272,7 @@ export default function VotingSettings({
                             Probar mensajes de WhatsApp
                         </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Envía ahora el recordatorio y la encuesta, o el
+                            Envía ahora el mensaje de votación, o el
                             resumen de hoy, a un número. No cuenta como envío de
                             la jornada.
                         </p>
