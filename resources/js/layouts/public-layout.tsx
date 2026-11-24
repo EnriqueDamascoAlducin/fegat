@@ -70,33 +70,20 @@ function SiteAnchor({ link, className, style, onClick, children }: { link: SiteL
 }
 
 function PoweredByTicker() {
-    const items = Array.from({ length: 12 }, (_, index) => index);
-
     return (
-        <div className="overflow-hidden bg-[#4a0873] py-1.5 font-display text-xs tracking-[0.25em] text-white/90 uppercase">
-            <a href={MY_FLIGHT_URL} target="_blank" rel="noreferrer" className="sr-only">
-                Powered by My Flight
+        <div className="bg-[#4a0873] px-4 py-1.5 font-display text-xs text-white/90">
+            <a
+                href={MY_FLIGHT_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="mx-auto flex w-fit flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center hover:text-white hover:underline"
+            >
+                Administra tus reservas gratis con
+                <span className="inline-flex items-center gap-1.5 font-semibold">
+                    MyFlight
+                    <img src={MY_FLIGHT_LOGO} alt="" className="size-5" />
+                </span>
             </a>
-            <div aria-hidden="true" className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none">
-                {[0, 1].map((half) => (
-                    <div key={half} className="flex shrink-0">
-                        {items.map((item) => (
-                            <a
-                                key={item}
-                                href={MY_FLIGHT_URL}
-                                target="_blank"
-                                rel="noreferrer"
-                                tabIndex={-1}
-                                className="flex items-center gap-2 px-8 whitespace-nowrap hover:text-white hover:underline"
-                            >
-                                Powered by
-                                <img src={MY_FLIGHT_LOGO} alt="" className="size-5" />
-                                My Flight
-                            </a>
-                        ))}
-                    </div>
-                ))}
-            </div>
         </div>
     );
 }
